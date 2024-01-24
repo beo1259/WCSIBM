@@ -1,0 +1,27 @@
+CREATE TABLE testschema.student (
+    studentid INT NOT NULL PRIMARY KEY,
+    fname VARCHAR(255) NOT NULL,
+    lname VARCHAR(255) NOT NULL
+);
+
+ALTER TABLE testschema.student ALTER COLUMN studentid BIGINT;
+
+ALTER TABLE testschema.student
+ADD fname VARCHAR(255)
+ADD lname VARCHAR(255);
+
+DROP TABLE testschema.students;
+
+SELECT * FROM testschema.student;
+
+ALTER TABLE testschema.student DROP COLUMN lname DROP COLUMN fname;
+ALTER TABLE testschema.student DROP COLUMN studentid;
+ALTER TABLE testschema.student ADD fname VARCHAR(255) NOT NULL ADD lname VARCHAR(255) NOT NULL;
+
+REORG TABLE testschema.student;
+
+ALTER TABLE testschema.student ALTER COLUMN fname DROP NOT NULL;
+
+
+INSERT INTO testschema.student (studentid) VALUES (215226514);
+INSERT INTO testschema.student (studentid, fname, lname) VALUES (251226514, 'Brayden', 'O''Neil');
