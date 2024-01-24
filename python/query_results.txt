@@ -1,0 +1,2 @@
+123456789 Alice Johnson       BSc Computer Science             30   90Transcript details here                 Scholarship details here      2023/2024      Schedule details here                   alice.johnson@example.com     securepassword123             
+234567890 Bob Johnson         BSc Computer Science             40   80Transcript details here                 Scholarship details here      2023/2024      Schedule details here                   bob.j@example.com             anothersecurepass             
