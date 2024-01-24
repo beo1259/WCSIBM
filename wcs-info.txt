@@ -7,8 +7,5 @@ USS IP:
 DB2 PW:
 Zmframewcs_54379@
 
-My laptop IPv4:
-192.168.50.232
-
-GPT-4 API Key:
+GPT-4 API Key (*DO NOT SPAM THIS I HAVE TO PAY, I CAN SEE UR IP WHEN U USE IT* ask me first if it's for data generation, which is fine):
 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
