@@ -19,11 +19,11 @@ def format_fixed_width(record):
 
 # Connection string for Db2
 conn_string = (
-    "DATABASE=STUCENTR;"
-    "HOSTNAME=localhost;"
-    "PORT=25000;"
+    "DATABASE=TESTING;"
+    "HOSTNAME=148.100.78.14;"
+    "PORT=50000;"
     "PROTOCOL=TCPIP;"
-    "UID=db2admin;"
+    "UID=db2inst1;"
     "PWD=Zmframewcs_54379@;"
 )
 

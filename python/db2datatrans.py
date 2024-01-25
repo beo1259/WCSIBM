@@ -3,11 +3,11 @@ import json
 
 # Connection string
 conn_string = (
-    "DATABASE=STUCENTR;"
-    "HOSTNAME=localhost;"
-    "PORT=25000;"
+    "DATABASE=TESTING;"
+    "HOSTNAME=148.100.78.14;"
+    "PORT=50000;"
     "PROTOCOL=TCPIP;"
-    "UID=db2admin;"
+    "UID=db2isnt1;"
     "PWD=Zmframewcs_54379@;"
 )
 
