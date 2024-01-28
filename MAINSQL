@@ -1,0 +1,246 @@
+CALL SYSPROC.ADMIN_CMD('REORG TABLE STUCENTR.LabEnrollment');
+
+SELECT * FROM STUCENTR.Student;
+
+SELECT * FROM STUCENTR.Professor;
+
+SELECT * FROM STUCENTR.Program;
+
+SELECT * FROM STUCENTR.Course;
+
+SELECT * FROM STUCENTR.Enrollment;
+
+SELECT * FROM STUCENTR.Prerequisite;
+
+SELECT * FROM STUCENTR.ProgramReq;
+
+SELECT * FROM STUCENTR.Location;
+
+SELECT * FROM STUCENTR.Room;
+
+SELECT * FROM STUCENTR.Lecture;
+
+SELECT * FROM STUCENTR.LectureEnrollment;
+
+SELECT * FROM STUCENTR.Lab;
+
+SELECT * FROM STUCENTR.LabEnrollment;
+
+SELECT StudentID FROM STUCENTR.Student;
+
+INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (010, 'Law');
+INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (011, 'Mathematics');
+
+INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('CALC1000', 11, 438169386, 'Calculus I', 1);
+
+INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('MATH1600', 11, 438169386, 'Linear Algebra', 1);
+
+
+CREATE TABLE STUCENTR.Student (
+	StudentID INT PRIMARY KEY NOT NULL,
+	Email VARCHAR(255) UNIQUE NOT NULL,
+	Pass VARCHAR(255) NOT NULL,
+	Phone VARCHAR(20),
+	FirstName VARCHAR(100),
+	LastName VARCHAR(100)
+);
+
+-- Step 1: Drop the primary key constraint
+ALTER TABLE STUCENTR.Course
+DROP PRIMARY KEY;
+
+-- Step 2: Alter the CourseID column
+ALTER TABLE STUCENTR.Course
+ALTER COLUMN CourseID SET DATA TYPE VARCHAR(100);
+
+CALL SYSPROC.ADMIN_CMD('REORG TABLE STUCENTR.Course');
+
+-- Step 3: Add the primary key constraint back
+ALTER TABLE STUCENTR.Course
+ADD PRIMARY KEY (CourseID);
+
+CREATE TABLE STUCENTR.Course (
+	CourseID VARCHAR(100) PRIMARY KEY NOT NULL,
+	ProgramID INT,
+	ProfessorID INT,
+	CourseName VARCHAR(255),
+	Credit INT,
+	FOREIGN KEY (ProgramID) REFERENCES STUCENTR.Program(ProgramID),
+	FOREIGN KEY (ProfessorID) REFERENCES STUCENTR.Professor(ProfessorID)
+);
+
+ALTER TABLE STUCENTR.Course
+DROP COLUMN EndTime;
+
+CREATE TABLE STUCENTR.Program (
+	ProgramID INT PRIMARY KEY NOT NULL,
+	ProgramName VARCHAR(255)
+);
+
+CREATE TABLE STUCENTR.Enrollment(
+	EnrollmentID INT PRIMARY KEY NOT NULL,
+	StudentID INT,
+	CourseID INT,
+	FOREIGN KEY (StudentID) REFERENCES STUCENTR.Student(StudentID),
+	FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID)
+);
+
+
+INSERT INTO STUCENTR.Enrollment (EnrollmentID, StudentID, CourseID) VALUES (43215, 823321975, 'CS1026');
+
+ALTER TABLE STUCENTR.Enrollment ALTER COLUMN CourseID SET DATA TYPE VARCHAR(100);
+
+ALTER TABLE STUCENTR.Enrollment
+ADD CONSTRAINT CourseID
+FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID);
+
+CREATE TABLE STUCENTR.Grade (
+	EnrollmentID INT PRIMARY KEY NOT NULL,
+	PercentageGrade INT,
+	FOREIGN KEY (EnrollmentID) REFERENCES STUCENTR.Enrollment(EnrollmentID)
+);
+
+CREATE TABLE STUCENTR.Professor(
+	ProfessorID INT PRIMARY KEY NOT NULL,
+	ProgramID INT,
+	FirstName VARCHAR(100),
+	LastName VARCHAR(100),
+	FOREIGN KEY (ProgramID) REFERENCES STUCENTR.Program(ProgramID)
+);
+
+UPDATE STUCENTR.Professor
+SET ProgramID = 11
+WHERE ProfessorID  = 438169386;
+
+CREATE TABLE STUCENTR.Prerequisite (
+	CourseID VARCHAR(100)NOT NULL, 
+	PrerequisiteID VARCHAR(100) NOT NULL,
+	FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID),
+	FOREIGN KEY (PrerequisiteID) REFERENCES STUCENTR.Course(CourseID),
+	PRIMARY KEY(CourseID, PrerequisiteID)
+);
+
+DROP TABLE STUCENTR.Prerequisite;
+
+DELETE FROM STUCENTR.Prerequisite WHERE CourseID = 'CS1026' AND PrerequisiteID = 'CS1027';
+
+INSERT INTO STUCENTR.Prerequisite (CourseID, PrerequisiteID) VALUES ('CS1027', 'CS1026');
+
+INSERT INTO STUCENTR.Prerequisite (CourseID, PrerequisiteID) VALUES ('CS3377', 'CS1027');
+INSERT INTO STUCENTR.Prerequisite (CourseID, PrerequisiteID) VALUES ('CS3377', 'CALC1000');
+INSERT INTO STUCENTR.Prerequisite (CourseID, PrerequisiteID) VALUES ('CS3377', 'MATH1600');
+INSERT INTO STUCENTR.Prerequisite (CourseID, PrerequisiteID) VALUES ('CS3350', 'CS2209');
+
+
+ALTER TABLE STUCENTR.Prerequisite DROP PRIMARY KEY;
+
+ALTER TABLE STUCENTR.Prerequisite ALTER COLUMN CourseID SET DATA TYPE VARCHAR(100);
+
+ALTER TABLE STUCENTR.Prerequisite 
+ADD PRIMARY KEY (CourseID, PrerequisiteID);
+
+CREATE TABLE STUCENTR.ProgramReq (
+	ProgramID INT NOT NULL,
+	CourseID INT NOT NULL,
+	FOREIGN KEY (ProgramID) REFERENCES STUCENTR.Program(ProgramID),
+	FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID),
+	PRIMARY KEY (ProgramID, CourseID)
+);
+
+CREATE TABLE STUCENTR.Location (
+    LocationID VARCHAR(10) PRIMARY KEY NOT NULL,
+    LocationName VARCHAR(100) NOT NULL
+);
+
+INSERT INTO STUCENTR.Location (LocationID, LocationName) VALUES ('NATSCI', 'Natural Sciences Center');
+
+CREATE TABLE STUCENTR.Room (
+    RoomID VARCHAR(10) PRIMARY KEY NOT NULL, 
+    LocationID VARCHAR(10) NOT NULL,
+    RoomNumber INT,
+    Capacity INT,
+    FOREIGN KEY (LocationID) REFERENCES STUCENTR.Location(LocationID)
+);
+
+ALTER TABLE STUCENTR.Room
+DROP COLUMN RoomNumber;
+
+ALTER TABLE STUCENTR.Room
+ADD COLUMN RoomNumber INT;
+
+INSERT INTO STUCENTR.Room (RoomID, LocationID, Capacity, RoomNumber) VALUES ('NATSCI1', 'NATSCI', 1, 700);
+
+CREATE TABLE STUCENTR.Lecture (
+    LectureID INT NOT NULL,
+    CourseID VARCHAR(10) NOT NULL,
+    ProfessorID INT NOT NULL,
+    RoomID VARCHAR(10) NOT NULL,
+    StartTime TIMESTAMP NOT NULL,
+    EndTime TIMESTAMP NOT NULL,
+    Weekday INT NOT NULL,
+    FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID),
+    FOREIGN KEY (ProfessorID) REFERENCES STUCENTR.Professor(ProfessorID),
+    FOREIGN KEY (RoomID) REFERENCES STUCENTR.Room(RoomID),
+    PRIMARY KEY(LectureID, CourseID)
+);
+
+CREATE TABLE STUCENTR.LectureEnrollment (
+    LectureID INT NOT NULL,
+    CourseID VARCHAR(10) NOT NULL,
+    StudentID INT NOT NULL,
+    FOREIGN KEY (LectureID, CourseID) REFERENCES STUCENTR.Lecture(LectureID, CourseID),
+    FOREIGN KEY (StudentID) REFERENCES STUCENTR.Student(StudentID),
+    PRIMARY KEY (StudentID, LectureID, CourseID)
+);
+
+INSERT INTO STUCENTR.LectureEnrollment (LectureID, CourseID, StudentID) VALUES (93847, 'CS1026', 823321975);
+
+ALTER TABLE STUCENTR.Lab
+DROP COLUMN StartTime;
+
+ALTER TABLE STUCENTR.Lab
+ADD COLUMN StartTime TIME;
+
+INSERT INTO STUCENTR.Lecture (LectureID, CourseID, ProfessorID, RoomID, StartTime, EndTime, Weekday) VALUES (93847, 'CS1026', 438169386, 'NATSCI1', '09:30:00', '11:30:00', 1);
+
+CREATE TABLE STUCENTR.Lab (
+    LabID INT NOT NULL,
+    CourseID VARCHAR(10) NOT NULL,
+    ProfessorID INT NOT NULL,
+    RoomID VARCHAR(10) NOT NULL,
+    StartTime TIME NOT NULL,
+    EndTime TIME NOT NULL,
+    Weekday INT NOT NULL,
+    FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID),
+    FOREIGN KEY (ProfessorID) REFERENCES STUCENTR.Professor(ProfessorID),
+    FOREIGN KEY (RoomID) REFERENCES STUCENTR.Room(RoomID),
+    PRIMARY KEY(LabID, CourseID)
+);
+
+CREATE TABLE STUCENTR.LabEnrollment (
+    LabID INT NOT NULL,
+    CourseID VARCHAR(10) NOT NULL,
+    StudentID INT NOT NULL,
+    AttendanceDate DATE,
+    AttendanceStatus VARCHAR(20),
+    FOREIGN KEY (LabID, CourseID) REFERENCES STUCENTR.Lab(LabID, CourseID),
+    FOREIGN KEY (StudentID) REFERENCES STUCENTR.Student(StudentID),
+    PRIMARY KEY (StudentID, LabID, CourseID)
+);
+
+ALTER TABLE STUCENTR.LabEnrollment
+DROP COLUMN AttendanceDate;
+
+ALTER TABLE STUCENTR.Lab
+ADD COLUMN AttendanceDate DATE;
+
+INSERT INTO STUCENTR.LabEnrollment (LabID, CourseID, StudentID) VALUES (32453, 'CS1026', 823321975);
+
+INSERT INTO STUCENTR.Lab (LabID, CourseID, ProfessorID, RoomID, StartTime, EndTime, Weekday) VALUES (32453, 'CS1026', 438169386, 'NATSCI1', '13:30:00', '14:30:00', 3);
+
+DELETE FROM STUCENTR.Lab WHERE LabID = 32453;
+
+INSERT INTO STUCENTR.ProgramReq (ProgramID, CourseID) VALUES (1, 'CS3377');
+
+	
+	
