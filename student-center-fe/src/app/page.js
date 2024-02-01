@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Dashboard from './dashboard/page';
+import session from 'express-session';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -26,6 +27,9 @@ const LoginPage = () => {
       if (response.ok) {
         console.log('Login successful:', data);
 
+        console.log(data.user.STUDENTID)
+
+        sessionStorage.setItem('studentId', data.user.STUDENTID)
 
         push('/dashboard');
       } else {
@@ -48,7 +52,7 @@ const LoginPage = () => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 p-2 text-black block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
             </div>
@@ -59,7 +63,7 @@ const LoginPage = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 p-2 text-black block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
             </div>
