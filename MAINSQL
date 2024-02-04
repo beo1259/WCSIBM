@@ -6,6 +6,8 @@ SELECT * FROM STUCENTR.Professor;
 
 SELECT * FROM STUCENTR.Program;
 
+SELECT * FROM STUCENTR.ProgramEnrollment;
+
 SELECT * FROM STUCENTR.Course;
 
 SELECT * FROM STUCENTR.Enrollment;
@@ -27,6 +29,10 @@ SELECT * FROM STUCENTR.Lab;
 SELECT * FROM STUCENTR.LabEnrollment;
 
 SELECT StudentID FROM STUCENTR.Student;
+
+UPDATE STUCENTR.Student
+SET Year = 2
+WHERE StudentID  = 607755715;
 
 INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (010, 'Law');
 INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (011, 'Mathematics');
@@ -78,6 +84,16 @@ CREATE TABLE STUCENTR.Program (
 	ProgramName VARCHAR(255)
 );
 
+CREATE TABLE STUCENTR.ProgramEnrollment(
+	ProgramEnrollmentID INT PRIMARY KEY NOT NULL,
+	StudentID INT, 
+	ProgramID INT,
+	FOREIGN KEY (StudentID) REFERENCES STUCENTR.Student(StudentID),
+	FOREIGN KEY (ProgramID) REFERENCES STUCENTR.Program(ProgramID)
+);
+
+INSERT INTO STUCENTR.ProgramEnrollment (ProgramEnrollmentID, StudentID, ProgramID) VALUES (43299, 607755715, 2);
+
 CREATE TABLE STUCENTR.Enrollment(
 	EnrollmentID INT PRIMARY KEY NOT NULL,
 	StudentID INT,
@@ -87,9 +103,12 @@ CREATE TABLE STUCENTR.Enrollment(
 );
 
 
+
 INSERT INTO STUCENTR.Enrollment (EnrollmentID, StudentID, CourseID) VALUES (43215, 823321975, 'CS1026');
 
 ALTER TABLE STUCENTR.Enrollment ALTER COLUMN CourseID SET DATA TYPE VARCHAR(100);
+
+ALTER TABLE STUCENTR.Student 
 
 ALTER TABLE STUCENTR.Enrollment
 ADD CONSTRAINT CourseID
