@@ -34,12 +34,18 @@ UPDATE STUCENTR.Student
 SET Year = 2
 WHERE StudentID  = 607755715;
 
+UPDATE STUCENTR.Course
+SET CourseID = 'MATH1000'
+WHERE CourseID  = 'CALC1000';
+
 INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (010, 'Law');
 INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (011, 'Mathematics');
 
 INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('CALC1000', 11, 438169386, 'Calculus I', 1);
 
 INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('MATH1600', 11, 438169386, 'Linear Algebra', 1);
+
+INSERT INTO STUCENTR.Course (CourseID, 
 
 SELECT CourseID FROM STUCENTR.Enrollment WHERE StudentID = 823321975;
 
@@ -102,13 +108,15 @@ CREATE TABLE STUCENTR.Enrollment(
 	FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID)
 );
 
-
+INSERT INTO STUCENTR.Professor (ProfessorID, ProgramID, FirstName, LastName) VALUES (543289043, 6, 'Friedrich', 'Nietzsche'); 
 
 INSERT INTO STUCENTR.Enrollment (EnrollmentID, StudentID, CourseID) VALUES (43215, 823321975, 'CS1026');
 
 ALTER TABLE STUCENTR.Enrollment ALTER COLUMN CourseID SET DATA TYPE VARCHAR(100);
 
-ALTER TABLE STUCENTR.Student 
+INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (12, 'English');
+
+INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('2314E', 12, 747320343, 'Chat Is This Real? A Dive Into Existentialism', 1);
 
 ALTER TABLE STUCENTR.Enrollment
 ADD CONSTRAINT CourseID
