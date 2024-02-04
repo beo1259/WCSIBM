@@ -1,0 +1,71 @@
+Git Workflow Tutorial
+---------------------
+
+This tutorial provides a basic workflow for using Git, from cloning a repository to safely working with branches.
+
+Setting Up Your Workspace
+-------------------------
+
+*******Cloning the Repository*******
+
+    git clone https://github.com/beo1259/WCSIBM
+    cd repository
+
+Working with Branches
+---------------------
+
+*******Checking Out a Branch*******
+
+To switch to an existing branch:
+    git checkout branch_name
+
+To create a new branch and switch to it:
+    git checkout -b new_branch_name
+
+*******Updating Your Branch*******
+
+It's a good practice to keep your branch updated with the main branch:
+
+    git checkout branch_name
+    git pull origin main
+
+Resolve any conflicts that arise before moving forward!!!
+
+*******Pushing Changes*******
+
+After committing your changes on the feature branch, push them to the remote repository:
+
+    git push origin branch_name
+
+Merging Changes Safely
+----------------------
+
+Pull Request (GitHub) or Merge Request (GitLab)
+When your feature is complete, push your branch and create a Pull Request or Merge Request in your repository's web interface.
+
+Code Review
+Have team members review your changes, run automated tests, and ensure everything is in order.
+
+*******Handling Merge Conflicts*******
+
+If there are conflicts with the main branch, resolve them locally on your branch:
+
+    git fetch origin
+    git merge origin/main
+
+Fix the conflicts and then commit the changes:
+
+    git commit -am "Resolved conflicts with main"
+    git push origin branch_name
+
+*******Merging into Main*******
+
+Once your PR/MR is approved and conflicts are resolved, merge it into the main branch through the web interface.
+
+*******Cleaning Up*******
+
+After the merge, delete the remote feature branch and pull the latest main branch:
+    git branch -d branch_name               # Delete local branch
+    git push origin --delete branch_name    # Delete remote branch
+    git checkout main
+    git pull origin main
