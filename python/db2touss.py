@@ -4,22 +4,18 @@ import ftplib
 # Function to convert a record to a fixed-width format
 def format_fixed_width(record):
     formatted_record = ''
-    formatted_record += str(record['STUDENTID']).ljust(10)  # Student ID, left-justified, 10 characters
-    formatted_record += record['NAME'].ljust(20)            # Name, 20 characters
-    formatted_record += record['DEGREE'].ljust(30)          # Degree, 30 characters
-    formatted_record += str(record['CREDITSEARNED']).rjust(5)  # Credits Earned, right-justified, 5 characters
-    formatted_record += str(record['CREDITSLEFT']).rjust(5)    # Credits Left, 5 characters
-    formatted_record += record['TRANSCRIPT'].ljust(40)      # Transcript, 40 characters
-    formatted_record += record['SCHOLARSHIPDETAILS'].ljust(30) # Scholarship Details, 30 characters
-    formatted_record += record['CURRENTACADEMICCALENDAR'].ljust(15) # Academic Calendar, 15 characters
-    formatted_record += record['GENERATEDSCHEDULE'].ljust(40) # Generated Schedule, 40 characters
-    formatted_record += record['EMAIL'].ljust(30)           # Email, 30 characters
-    formatted_record += record['PASSWORD'].ljust(30)        # Password, 30 characters
+    formatted_record += str(record['STUDENTID']).ljust(10)  # StudentID, left-justified, 10 characters
+    formatted_record += record['EMAIL'].ljust(20)            # EMAIL, 20 characters
+    formatted_record += record['PASS'].ljust(30)          # PASS, 30 characters
+    formatted_record += str(record['PHONE']).rjust(5)  # PHONE, 25 characters
+    formatted_record += str(record['FIRSTNAME']).rjust(5)    # FIRST NAME, 30 characters
+    formatted_record += record['LASTNAME'].ljust(40)      # LASTNAME, 40 characters
+
     return formatted_record + '\n'  # Add a newline at the end of each record
 
 # Connection string for Db2
 conn_string = (
-    "DATABASE=TESTING;"
+    "DATABASE=WCS2024;"
     "HOSTNAME=148.100.78.14;"
     "PORT=50000;"
     "PROTOCOL=TCPIP;"
@@ -31,7 +27,7 @@ conn_string = (
 conn = ibm_db.connect(conn_string, '', '')
 
 # SQL Query
-select = "SELECT * FROM stuschema.student"
+select = "SELECT * FROM STUCENTR.Student"
 
 # Execute the query
 stmt = ibm_db.exec_immediate(conn, select)
@@ -65,5 +61,3 @@ with ftplib.FTP(ftp_hostname) as ftp:
 print(file)
 
 print("File transferred successfully.")
-
-
