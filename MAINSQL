@@ -41,13 +41,21 @@ SET CourseID = 'MATH1000'
 WHERE CourseID  = 'CALC1000';
 
 INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (010, 'Law');
-INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (011, 'Mathematics');
+INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (015, 'History');
+INSERT INTO STUCENTR.Professor (ProfessorID, ProgramID, FirstName, LastName) VALUES (563327890, 15, 'Napolean', 'Bonaparte');
+INSERT INTO STUCENTR.Professor (ProfessorID, ProgramID, FirstName, LastName) VALUES (975342983, 14, 'Pablo', 'Picasso');
 
-INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('CALC1000', 11, 438169386, 'Calculus I', 1);
+
+INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('PSY2032', 3, 918194875, 'Psych Of Crime & Corrections', 1);
+UPDATE STUCENTR.Course 
+SET ProgramID = 15
+WHERE ProfessorID = 563327890;
 
 INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('MATH1600', 11, 438169386, 'Linear Algebra', 1);
 
 INSERT INTO STUCENTR.Course (CourseID, 
+
+DELETE FROM STUCENTR.Lecture;
 
 SELECT CourseID FROM STUCENTR.Enrollment WHERE StudentID = 823321975;
 
@@ -162,9 +170,12 @@ CREATE TABLE STUCENTR.Prerequisite (
 
 DROP TABLE STUCENTR.Prerequisite;
 
-DELETE FROM STUCENTR.Prerequisite WHERE CourseID = 'CS1026' AND PrerequisiteID = 'CS1027';
+DELETE FROM STUCENTR.Lecture WHERE CourseID = 'CS2209';
+DELETE FROM STUCENTR.LectureEnrollment WHERE LectureID = 93847;
 
 INSERT INTO STUCENTR.Prerequisite (CourseID, PrerequisiteID) VALUES ('CS1027', 'CS1026');
+
+DELETE FROM STUCENTR.Student WHERE StudentID = 116889234;
 
 INSERT INTO STUCENTR.Prerequisite (CourseID, PrerequisiteID) VALUES ('CS3377', 'CS1027');
 INSERT INTO STUCENTR.Prerequisite (CourseID, PrerequisiteID) VALUES ('CS3377', 'CALC1000');
@@ -208,7 +219,7 @@ DROP COLUMN RoomNumber;
 ALTER TABLE STUCENTR.Room
 ADD COLUMN RoomNumber INT;
 
-INSERT INTO STUCENTR.Room (RoomID, LocationID, Capacity, RoomNumber) VALUES ('NATSCI1', 'NATSCI', 1, 700);
+INSERT INTO STUCENTR.Room (RoomID, LocationID, Capacity, RoomNumber) VALUES ('MC105', 'MC', 144, 105);
 
 CREATE TABLE STUCENTR.Lecture (
     LectureID INT NOT NULL,
@@ -256,6 +267,13 @@ ADD COLUMN EndDate DATE;
 UPDATE STUCENTR.Lecture 
 SET StartDate = '2024-09-08', EndDate = '2024-12-08'
 WHERE LectureID = 93847;
+
+UPDATE STUCENTR.Room
+SET RoomNumber = 117, Capacity = 122
+WHERE RoomID = 'NCB117';
+
+INSERT INTO STUCENTR.Location (LocationID, LocationName) VALUES ('UC', 'University College');
+INSERT INTO STUCENR.Room (
 
 INSERT INTO STUCENTR.Lecture (LectureID, CourseID, ProfessorID, RoomID, StartTime, EndTime, Weekday) VALUES (93847, 'CS1026', 438169386, 'NATSCI1', '09:30:00', '11:30:00', 1);
 
