@@ -34,7 +34,7 @@ select = "SELECT * FROM STUCENTR.Student"
 stmt = ibm_db.exec_immediate(conn, select)
 
 # Local file for saving query results
-local_file = 'query_results.txt'
+local_file = 'student_data.txt'
 
 # Open the file for writing
 with open(local_file, 'w') as file:
@@ -51,7 +51,7 @@ ibm_db.close(conn)
 ftp_hostname = '204.90.115.200'
 ftp_username = 'z41780'
 ftp_password = 'GEM31DUN'
-remote_file_path = '/z/z41780/WCS-IBM/data/query_result.txt'
+remote_file_path = '/z/z41780/WCS-IBM/data/student_data.txt'
 
 # FTP transfer
 with ftplib.FTP(ftp_hostname) as ftp:
