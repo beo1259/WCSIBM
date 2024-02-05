@@ -10,10 +10,10 @@ const program_status = () => {
                 <Header />
             </div>
             <div className='grid grid-cols-2 w-full'>
-                <div className='bg-white p-6 m-24 rounded-lg drop-shadow-lg'>
+                <div className='bg-white p-6 m-16 rounded-lg drop-shadow-lg w-[%]'>
                     <p className='text-black'>Hello</p>
                 </div>
-                <div className='bg-white p-6 m-24 rounded-lg drop-shadow-lg'>
+                <div className='bg-white p-6 m-16 rounded-lg drop-shadow-lg w-[%]'>
                     <p className='text-black'>Hello</p>
                 </div>
             </div>
