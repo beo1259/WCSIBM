@@ -5,11 +5,11 @@ import ftplib
 def format_fixed_width(record):
     formatted_record = ''
     formatted_record += str(record['STUDENTID']).ljust(20)  # StudentID, left-justified, 10 characters
-    formatted_record += record['EMAIL'].ljust(30)            # EMAIL, 20 characters
-    formatted_record += record['PASS'].ljust(20)          # PASS, 30 characters
+    formatted_record += str(record['EMAIL']).ljust(30)            # EMAIL, 20 characters
+    formatted_record += str(record['PASS']).ljust(20)          # PASS, 30 characters
     formatted_record += str(record['PHONE']).ljust(25)  # PHONE, 25 characters
     formatted_record += str(record['FIRSTNAME']).ljust(30)    # FIRST NAME, 30 characters
-    formatted_record += str(record['LASTNAME']).ljust(30)      # LASTNAME, 30 characters
+    formatted_record += str(record['LASTNAME']).ljust(20)      # LASTNAME, 30 characters
     formatted_record += str(record['YEAR']).ljust(10)   # YEAR, 10 characters
 
     return formatted_record + '\n'  # Add a newline at the end of each record
