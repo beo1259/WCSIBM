@@ -6,17 +6,17 @@ def format_fixed_width(record):
     formatted_record = ''
     formatted_record += str(record['STUDENTID']).ljust(20)  # StudentID, left-justified, 10 characters
     formatted_record += record['EMAIL'].ljust(30)            # EMAIL, 20 characters
-    formatted_record += record['PASS'].ljust(30)          # PASS, 30 characters
+    formatted_record += record['PASS'].ljust(20)          # PASS, 30 characters
     formatted_record += str(record['PHONE']).ljust(25)  # PHONE, 25 characters
-    formatted_record += str(record['FIRSTNAME']).ljust(25)    # FIRST NAME, 30 characters
-    formatted_record += record['LASTNAME'].ljust(40)      # LASTNAME, 40 characters
+    formatted_record += str(record['FIRSTNAME']).ljust(30)    # FIRST NAME, 30 characters
+    formatted_record += str(record['LASTNAME']).ljust(30)      # LASTNAME, 40 characters
 
     return formatted_record + '\n'  # Add a newline at the end of each record
 
 # Connection string for Db2
 conn_string = (
     "DATABASE=WCS2024;"
-    "HOSTNAME=148.100.78.14;"
+    "HOSTNAME=localhost;"
     "PORT=50000;"
     "PROTOCOL=TCPIP;"
     "UID=db2inst1;"
