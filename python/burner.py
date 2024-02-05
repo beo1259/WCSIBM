@@ -14,29 +14,19 @@ try:
     # Create database connection
     db_connection = ibm_db.connect(dsn, "", "")
     
-    # Add the 'Year' column to the table
-    alter_table_sql = "ALTER TABLE STUCENTR.Student ADD COLUMN Year INT"
+    # Add the 'ESSAYCREDIT' column to the table
+    alter_table_sql = "ALTER TABLE STUCENTR.Course ADD COLUMN ESSAYCREDIT CHAR(1)"
     ibm_db.exec_immediate(db_connection, alter_table_sql)
     
-    # Generate and execute the update statement for each row
-    update_sql = "UPDATE STUCENTR.Student SET Year = ? WHERE STUDENTID = ?"
-    stmt_update = ibm_db.prepare(db_connection, update_sql)
+    # Update the first 20 rows with 'N' for the 'ESSAYCREDIT' column
+    update_sql_N = "UPDATE STUCENTR.Course SET ESSAYCREDIT = 'N' WHERE CourseID IN (SELECT CourseID FROM STUCENTR.Course ORDER BY CourseID FETCH FIRST 20 ROWS ONLY)"
+    ibm_db.exec_immediate(db_connection, update_sql_N)
     
-    # Fetch the student ids to update
-    select_sql = "SELECT STUDENTID FROM STUCENTR.Student"
-    stmt_select = ibm_db.exec_immediate(db_connection, select_sql)
-    
-    # Update rows with random year
-    row = ibm_db.fetch_assoc(stmt_select)
-    while row:
-        year = random.randint(1, 4)  # Generate a random year
-        ibm_db.bind_param(stmt_update, 1, year)
-        ibm_db.bind_param(stmt_update, 2, row['STUDENTID'])
-        ibm_db.execute(stmt_update)
-        
-        row = ibm_db.fetch_assoc(stmt_select)
+    # Update the last 7 rows with 'Y' for the 'ESSAYCREDIT' column
+    update_sql_Y = "UPDATE STUCENTR.Course SET ESSAYCREDIT = 'Y' WHERE CourseID IN (SELECT CourseID FROM STUCENTR.Course ORDER BY CourseID DESC FETCH FIRST 7 ROWS ONLY)"
+    ibm_db.exec_immediate(db_connection, update_sql_Y)
 
-    print("All rows have been updated with a random Year value.")
+    print("Rows have been updated with 'ESSAYCREDIT' values.")
     
 except Exception as e:
     print("An error occurred: ", e)

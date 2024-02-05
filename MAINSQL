@@ -1,4 +1,4 @@
-CALL SYSPROC.ADMIN_CMD('REORG TABLE STUCENTR.LabEnrollment');
+CALL SYSPROC.ADMIN_CMD('REORG TABLE STUCENTR.Student');
 
 SELECT * FROM STUCENTR.Student;
 
@@ -11,6 +11,8 @@ SELECT * FROM STUCENTR.ProgramEnrollment;
 SELECT * FROM STUCENTR.Course;
 
 SELECT * FROM STUCENTR.Enrollment;
+
+SELECT * FROM STUCENTR.PrevEnrollment;
 
 SELECT * FROM STUCENTR.Prerequisite;
 
@@ -30,9 +32,9 @@ SELECT * FROM STUCENTR.LabEnrollment;
 
 SELECT StudentID FROM STUCENTR.Student;
 
-UPDATE STUCENTR.Student
-SET Year = 2
-WHERE StudentID  = 607755715;
+UPDATE STUCENTR.Course
+SET CourseID = 'PHIL2343E'
+WHERE CourseID  = '2343E';
 
 UPDATE STUCENTR.Course
 SET CourseID = 'MATH1000'
@@ -108,6 +110,14 @@ CREATE TABLE STUCENTR.Enrollment(
 	FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID)
 );
 
+CREATE TABLE STUCENTR.PrevEnrollment(
+	PrevEnrollmentID INT PRIMARY KEY NOT NULL,
+	StudentID INT,
+	CourseID VARCHAR(100),
+	FOREIGN KEY (StudentID) REFERENCES STUCENTR.Student(StudentID),
+	FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID)
+);
+
 INSERT INTO STUCENTR.Professor (ProfessorID, ProgramID, FirstName, LastName) VALUES (543289043, 6, 'Friedrich', 'Nietzsche'); 
 
 INSERT INTO STUCENTR.Enrollment (EnrollmentID, StudentID, CourseID) VALUES (43215, 823321975, 'CS1026');
@@ -116,7 +126,7 @@ ALTER TABLE STUCENTR.Enrollment ALTER COLUMN CourseID SET DATA TYPE VARCHAR(100)
 
 INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (12, 'English');
 
-INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('2314E', 12, 747320343, 'Chat Is This Real? A Dive Into Existentialism', 1);
+INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('2343E', 12, 543289043, 'What is Life? The Philosophy Of Nature, Being, and Reality', 1);
 
 ALTER TABLE STUCENTR.Enrollment
 ADD CONSTRAINT CourseID
@@ -136,9 +146,11 @@ CREATE TABLE STUCENTR.Professor(
 	FOREIGN KEY (ProgramID) REFERENCES STUCENTR.Program(ProgramID)
 );
 
-UPDATE STUCENTR.Professor
-SET ProgramID = 11
-WHERE ProfessorID  = 438169386;
+UPDATE STUCENTR.Student
+SET FirstName = 'Frank'
+WHERE FirstName  = 'Russell';
+
+ALTER TABLE STUCENTR.Student DROP COLUMN ESSAYCREDIT;
 
 CREATE TABLE STUCENTR.Prerequisite (
 	CourseID VARCHAR(100)NOT NULL, 
