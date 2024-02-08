@@ -82,7 +82,7 @@
     maxTime.setHours(22, 0, 0);
 
     return (
-      <div style={{ height: '90vh', width: '80%', margin: '0 auto' }}>
+      <div className='h-full w-full'>
         <Calendar
           localizer={localizer}
           events={lectures} // Here you pass the lectures state to the events prop
@@ -92,6 +92,9 @@
           style={{ height: '100%' }}
           min={minTime}
           max={maxTime}
+          eventPropGetter={(event, start, end, isSelected) => ({
+            className: 'text-xs', // Adjust the font size using Tailwind's text classes
+          })}
         />
       </div>
     );
