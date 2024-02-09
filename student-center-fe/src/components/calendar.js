@@ -36,6 +36,7 @@ const MyCalendarPage = () => {
         });
   
         setLectures(lecturesArray); 
+        console.log(lecturesArray);
       } catch (error) {
         console.error('Error fetching student lectures:', error);
       }
@@ -45,6 +46,7 @@ const MyCalendarPage = () => {
   }, [stuCalendarID]);
 
   useEffect(() => {
+    
     if (lectures.length > 0) {
       lectures.forEach((lecture) => {
         console.log(lecture.title); // Assuming the title holds the COURSEID

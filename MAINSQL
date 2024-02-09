@@ -1,4 +1,4 @@
-CALL SYSPROC.ADMIN_CMD('REORG TABLE STUCENTR.Student');
+CALL SYSPROC.ADMIN_CMD('REORG TABLE STUCENTR.Lab');
 
 SELECT * FROM STUCENTR.Student;
 
@@ -30,6 +30,8 @@ SELECT * FROM STUCENTR.Lab;
 
 SELECT * FROM STUCENTR.LabEnrollment;
 
+SELECT * FROM STUCENTR.Grade;
+
 SELECT StudentID FROM STUCENTR.Student;
 
 UPDATE STUCENTR.Course
@@ -44,6 +46,9 @@ INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (010, 'Law');
 INSERT INTO STUCENTR.Program (ProgramID, ProgramName) VALUES (015, 'History');
 INSERT INTO STUCENTR.Professor (ProfessorID, ProgramID, FirstName, LastName) VALUES (563327890, 15, 'Napolean', 'Bonaparte');
 INSERT INTO STUCENTR.Professor (ProfessorID, ProgramID, FirstName, LastName) VALUES (975342983, 14, 'Pablo', 'Picasso');
+
+SELECT DISTINCT(STUDENTID) FROM STUCENTR.PREVENROLLMENT;
+
 
 
 INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('PSY2032', 3, 918194875, 'Psych Of Crime & Corrections', 1);
@@ -61,6 +66,19 @@ DELETE FROM STUCENTR.LabEnrollment;
 DELETE FROM STUCENTR.Lab;
 
 SELECT CourseID FROM STUCENTR.Enrollment WHERE StudentID = 823321975;
+
+INSERT INTO STUCENTR.PrevEnrollment (PrevEnrollmentID, StudentID, CourseID) VALUES (74091, 823321975, 'PSY1002');
+
+DROP TABLE STUCENTR.Grade;
+
+SELECT * FROM STUCENTR.Grade;
+
+CREATE TABLE STUCENTR.Grade(
+	PrevEnrollmentID INT NOT NULL,
+	Grade INT NOT NULL,
+	FOREIGN KEY(PrevEnrollmentID) REFERENCES STUCENTR.PrevEnrollment(PrevEnrollmentID),
+	PRIMARY KEY (PrevEnrollmentID)
+	);
 
 CREATE TABLE STUCENTR.Student (
 	StudentID INT PRIMARY KEY NOT NULL,
@@ -131,6 +149,15 @@ CREATE TABLE STUCENTR.PrevEnrollment(
 	FOREIGN KEY (StudentID) REFERENCES STUCENTR.Student(StudentID),
 	FOREIGN KEY (CourseID) REFERENCES STUCENTR.Course(CourseID)
 );
+
+INSERT INTO STUCENTR.PrevEnrollment (PrevEnrollmentID, StudentID, CourseID) VALUES (781237, 823321975, 'ART1020');
+
+SELECT * FROM STUCENTR.Course;
+SELECT * FROM STUCENTR.PrevEnrollment;
+SELECT * FROM STUCENTR.Program;
+SELECT * FROM STUCENTR.Professor;
+
+INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit, EssayCredit) VALUES ('HIS1000', 15, 563327890, 'Classical Civilization', 1, 'N');
 
 INSERT INTO STUCENTR.Professor (ProfessorID, ProgramID, FirstName, LastName) VALUES (543289043, 6, 'Friedrich', 'Nietzsche'); 
 
@@ -250,7 +277,22 @@ CREATE TABLE STUCENTR.LectureEnrollment (
     PRIMARY KEY (StudentID, LectureID, CourseID)
 );
 
-INSERT INTO STUCENTR.LectureEnrollment (LectureID, CourseID, StudentID) VALUES (93847, 'CS1026', 823321975);
+INSERT INTO STUCENTR.LectureEnrollment (LectureID, CourseID, StudentID) VALUES (2576153, 'PHIL2343E', 823321975);
+INSERT INTO STUCENTR.LabEnrollment (LabID, CourseID, StudentID) VALUES (1294114, 'CS2208', 823321975);
+
+SELECT * FROM STUCENTR.Lecture;
+SELECT * FROM STUCENTR.LectureEnrollment;
+
+SELECT * FROM STUCENTR.Lab;
+SELECT * FROM STUCENTR.LabEnrollment;
+
+ALTER TABLE STUCENTR.Lab DROP COLUMN AttendanceDate; 
+
+DELETE FROM STUCENTR.LectureEnrollment WHERE LectureID = 7275206;
+
+UPDATE STUCENTR.LectureEnrollment
+SET LectureID = 2576153
+WHERE LectureID = 7275206;
 
 SELECT L.*
 FROM STUCENTR.Lecture L
@@ -270,9 +312,9 @@ ADD COLUMN StartDate DATE;
 ALTER TABLE STUCENTR.Lecture
 ADD COLUMN EndDate DATE;
 
-UPDATE STUCENTR.Lecture 
-SET StartDate = '2024-09-08', EndDate = '2024-12-08'
-WHERE LectureID = 93847;
+UPDATE STUCENTR.Lab 
+SET Weekday = 2
+WHERE LabID = 5516824;
 
 UPDATE STUCENTR.Room
 SET RoomNumber = 117, Capacity = 122
