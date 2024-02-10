@@ -41,9 +41,9 @@ const program_status = () => {
             </div>
             <div className='grid grid-cols-2 w-full'>
                 <div className='bg-white p-6 m-24 rounded-lg drop-shadow-lg'>
-                    <p className='text-black'>Year: {programInfo.year}</p>
-                    <p className='text-black'>Program: {programInfo.program}</p>
-                    <p className='text-black'>Degree: {programInfo.degree}</p>
+                    <p className='text-black'>Year - Undergraduate Year {programInfo.year}</p>
+                    <p className='text-black'>Program - {programInfo.program}</p>
+                    <p className='text-black'>Degree - {programInfo.degree}</p>
                 </div>
             </div>
         </div>
