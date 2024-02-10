@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/linux1/WCSIBM/python/data-trans/parent.py", line 7, in <module>
+    subprocess.call(["/home/linux1/WCSIBM/python/data-trans/student-trans.py"])
+  File "/usr/lib64/python3.9/subprocess.py", line 349, in call
+    with Popen(*popenargs, **kwargs) as p:
+  File "/usr/lib64/python3.9/subprocess.py", line 951, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib64/python3.9/subprocess.py", line 1837, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+PermissionError: [Errno 13] Permission denied: '/home/linux1/WCSIBM/python/data-trans/student-trans.py'
