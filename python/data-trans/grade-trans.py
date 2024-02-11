@@ -6,14 +6,9 @@ import ftplib
 # Function to convert a record to a fixed-width format
 def format_fixed_width(record):
     formatted_record = ''                                  # RECTIFY CHAR COUNT IN THE COMMENTS 
-    formatted_record += str(record['COURSEID']).ljust(10)  # CourseID, left-justified, 15 characters
-    formatted_record += str(record['PROGRAMID']).ljust(4)  # ProgramID, 19 characters
-    formatted_record += str(record['PROFESSORID']).ljust(10)  # ProfessorID, 19 characters
-    formatted_record += '\n'
-    formatted_record += str(record['COURSENAME']).ljust(1)  # CourseName, 19 characters
-    formatted_record += str(record['CREDIT']).ljust(2)  # Credit, 19 characters
-    formatted_record += '\n'
-    formatted_record += str(record['ESSAYCREDIT']).ljust(2)  # EssayCredit, 19 characters
+    formatted_record += str(record['PREVENROLLMENTID']).ljust(7)  # LectureID, left-justified, 15 characters
+    formatted_record += str(record['GRADE']).ljust(1)            # CourseID, 19 characters
+
 
     return formatted_record + '\n'  # Add a newline at the end of each record
 
@@ -31,13 +26,13 @@ conn_string = (
 conn = ibm_db.connect(conn_string, '', '')
 
 # SQL Query
-select = "SELECT * FROM STUCENTR.COURSE"
+select = "SELECT * FROM STUCENTR.LECTURE"
 
 # Execute the query
 stmt = ibm_db.exec_immediate(conn, select)
 
 # Local file for saving query results
-local_file = '/home/linux1/WCSIBM/python/data-trans/output/course_data.txt'
+local_file = '/home/linux1/WCSIBM/python/data-trans/output/lec_data.txt'
 
 # Open the file for writing
 with open(local_file, 'w') as file:
@@ -54,7 +49,7 @@ ibm_db.close(conn)
 ftp_hostname = '204.90.115.200'
 ftp_username = 'z41780'
 ftp_password = 'GEM31DUN'
-remote_file_path = '/z/z41780/WCS-IBM/data/course_data.txt'
+remote_file_path = '/z/z41780/WCS-IBM/data/lec_data.txt'
 
 # FTP transfer
 with ftplib.FTP(ftp_hostname) as ftp:
