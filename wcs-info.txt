@@ -5,6 +5,9 @@ GEM31DUN
 URL PORT:
 https://204.90.115.200:10443/
 
+HLQ:
+Z41780.WCS
+
 LINUXONE SSH (must be in repo with pem file):
 ssh -i cloudkey1.pem linux1@148.100.78.14
 
