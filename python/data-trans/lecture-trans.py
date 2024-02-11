@@ -7,10 +7,10 @@ import ftplib
 def format_fixed_width(record):
     formatted_record = ''                                  # RECTIFY CHAR COUNT IN THE COMMENTS 
     formatted_record += str(record['LECTUREID']).ljust(8)  # LectureID, left-justified, 15 characters
-    formatted_record += str(record['COURSEID']).ljust(10)            # CourseID, 19 characters
+    formatted_record += str(record['COURSEID']).ljust(11)            # CourseID, 19 characters
     formatted_record += str(record['PROFESSORID']).ljust(10)          # PASS, 19 characters
     formatted_record += str(record['ROOMID']).ljust(9)  # RoomID, 25 characters
-    formatted_record += str(record['WEEKDAY']).ljust(1)    # Weekday, 30 characters
+    formatted_record += str(record['WEEKDAY']).ljust(2)    # Weekday, 30 characters
     formatted_record += str(record['STARTTIME']).ljust(9)      # StartTime, 30 characters
     formatted_record += str(record['ENDTIME']).ljust(9)   # EndTime, 10 characters
     formatted_record += str(record['STARTDATE']).ljust(11)   # StartDate, 10 characters
