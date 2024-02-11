@@ -2,8 +2,11 @@
 
 import time
 import subprocess
+from datetime import date
 
 while True:
+    today = date.today()
+    print(f'\nData transferred on: {today}', flush=True)
     subprocess.call(["/home/linux1/WCSIBM/python/data-trans/student-trans.py"])
     subprocess.call(["/home/linux1/WCSIBM/python/data-trans/proffesor-trans.py"])
     subprocess.call(["/home/linux1/WCSIBM/python/data-trans/course-trans.py"])
