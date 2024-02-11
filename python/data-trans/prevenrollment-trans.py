@@ -6,7 +6,7 @@ import ftplib
 # Function to convert a record to a fixed-width format
 def format_fixed_width(record):
     formatted_record = ''
-    formatted_record += str(record['PREVENROLLMENTID']).ljust(6)
+    formatted_record += str(record['PREVENROLLMENTID']).ljust(7)
     formatted_record += str(record['STUDENTID']).ljust(10)
     formatted_record += str(record['COURSEID']).ljust(1)  
 
