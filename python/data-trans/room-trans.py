@@ -8,7 +8,7 @@ def format_fixed_width(record):
     formatted_record = ''
     formatted_record += str(record['ROOMID']).ljust(10)
     formatted_record += str(record['LOCATIONID']).ljust(9)
-    formatted_record += str(record['CAPCITY']).ljust(5)  
+    formatted_record += str(record['CAPACITY']).ljust(5)  
     formatted_record += str(record['ROOMNUMBER']).ljust(1)  
 
 

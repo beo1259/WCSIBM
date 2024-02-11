@@ -26,13 +26,13 @@ conn_string = (
 conn = ibm_db.connect(conn_string, '', '')
 
 # SQL Query
-select = "SELECT * FROM STUCENTR.LECTURE"
+select = "SELECT * FROM STUCENTR.GRADE"
 
 # Execute the query
 stmt = ibm_db.exec_immediate(conn, select)
 
 # Local file for saving query results
-local_file = '/home/linux1/WCSIBM/python/data-trans/output/lec_data.txt'
+local_file = '/home/linux1/WCSIBM/python/data-trans/output/grade_data.txt'
 
 # Open the file for writing
 with open(local_file, 'w') as file:
@@ -49,7 +49,7 @@ ibm_db.close(conn)
 ftp_hostname = '204.90.115.200'
 ftp_username = 'z41780'
 ftp_password = 'GEM31DUN'
-remote_file_path = '/z/z41780/WCS-IBM/data/lec_data.txt'
+remote_file_path = '/z/z41780/WCS-IBM/data/grade_data.txt'
 
 # FTP transfer
 with ftplib.FTP(ftp_hostname) as ftp:

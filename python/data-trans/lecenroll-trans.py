@@ -7,7 +7,7 @@ import ftplib
 def format_fixed_width(record):
     formatted_record = ''
     formatted_record += str(record['LECTUREID']).ljust(8)
-    formatted_record += str(record['LOCATIONID']).ljust(10)
+    formatted_record += str(record['COURSEID']).ljust(8)
     formatted_record += str(record['STUDENTID']).ljust(1)  
 
 
