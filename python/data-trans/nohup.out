@@ -2,3 +2,31 @@
 File transferred successfully.
 <_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/prof_data.txt'>
 File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/course_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/enrollment_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/grade_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/lab_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/labenrollment_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/lecenrollment_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/lec_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/location_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/prereq_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/prevenroll_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/progenroll_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/program_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/programreq_data.txt'>
+File transferred successfully.
+<_io.BufferedReader name='/home/linux1/WCSIBM/python/data-trans/output/room_data.txt'>
+File transferred successfully.

@@ -1,0 +1,120 @@
+CS1026    1   269129914 
+Computer Science Fundamentals I1 
+N 
+CS1027    1   269129914 
+Computer Science Fundamentals II1 
+N 
+CS2208    1   605165100 
+Introduction to Computer Organization and Architecture1 
+N 
+CS2209    1   128416350 
+Applied Logic for Computer Science1 
+N 
+CS2210    1   128416350 
+Data Structures and Algorithms1 
+N 
+CS2211    1   269129914 
+Software Tools and Systems Programming1 
+N 
+CS2212    1   128416350 
+Introduction to Software Engineering1 
+N 
+CS2214    1   128416350 
+Discrete Structures for Computing1 
+N 
+CS3305    1   605165100 
+Operating Systems1 
+N 
+CS3307    1   605165100 
+Object-Oriented Design and Analysis1 
+N 
+CS3319    1   605165100 
+Databases I1 
+N 
+CS3331    1   128416350 
+Foundations of Computer Science I1 
+N 
+CS3340    1   605165100 
+Analysis of Algorithms I1 
+N 
+CS3342    1   269129914 
+Organization of Programming Languages1 
+N 
+CS3346    1   605165100 
+Artificial Intelligence I1 
+N 
+CS3350    1   269129914 
+Computer Architecture1 
+N 
+CS3357    1   269129914 
+Computer Networks I1 
+N 
+CS3377    1   605165100 
+Software Project Management1 
+N 
+CALC1000  11  438169386 
+Calculus I1 
+N 
+MATH1600  11  438169386 
+Linear Algebra1 
+N 
+ENG2101E  12  431270922 
+Introduction to Expository Writing1 
+Y 
+ENG2111E  12  485904233 
+Writing in the World: Introduction to Professional Writing1 
+Y 
+ENG2125E  12  485904233 
+Let Me Explain It To You: Exposition and Visual Rhetoric1 
+Y 
+ENG2131E  12  431270922 
+No Bones About It: Writing In the Sciences1 
+Y 
+PHIL2612E 12  432453895 
+It Is What It Is: The Stoic Philosophy1 
+Y 
+PHIL2314E 12  747320343 
+Chat Is This Real? A Dive Into Existentialism1 
+Y 
+PHIL2343E 12  543289043 
+What is Life? The Philosophy Of Nature, Being, and Reality1 
+Y 
+FILM1022  13  432179043 
+Introduction to Film Studies1 
+None
+ART1646   13  432179043 
+Art, Media and Popular Culture1 
+None
+HIS2177   15  563327890 
+The Two World Wars1 
+None
+HIS2186   15  563327890 
+Zombie Apocalypse1 
+None
+HIS2311   15  563327890 
+United States: 1865 To Present1 
+None
+HIS2401   15  563327890 
+Medieval Europe1 
+None
+PSY1002   3   777073656 
+Psychology As Natural Science1 
+None
+PSY2015   3   777073656 
+Psych Of Perception1 
+None
+PSY2020   3   918194875 
+Drugs & Behavior1 
+None
+PSY2032   3   918194875 
+Psych Of Crime & Corrections1 
+None
+ART1045   14  975342983 
+Collecting Art and Culture1 
+N 
+ART1020   14  975342983 
+Foundations of Visual Arts1 
+N 
+HIS1000   15  563327890 
+Classical Civilization1 
+N 
