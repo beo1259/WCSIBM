@@ -7,7 +7,7 @@ import ftplib
 def format_fixed_width(record):
     formatted_record = ''                                  # RECTIFY CHAR COUNT IN THE COMMENTS 
     formatted_record += str(record['LOCATIONID']).ljust(10)  # LocationID, left-justified, 15 characters
-    formatted_record += str(record['LOCATIONNAME']).ljust(60)            # LocationName, 19 characters
+    formatted_record += str(record['LOCATIONNAME']).ljust(1)            # LocationName, 19 characters
 
     return formatted_record + '\n'  # Add a newline at the end of each record
 
