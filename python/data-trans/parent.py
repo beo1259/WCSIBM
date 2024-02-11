@@ -16,6 +16,7 @@ while True:
     subprocess.call(["/home/linux1/WCSIBM/python/data-trans/location-trans.py"])
     subprocess.call(["/home/linux1/WCSIBM/python/data-trans/prerequisite-trans.py"])
     subprocess.call(["/home/linux1/WCSIBM/python/data-trans/prevenrollment-trans.py"])
+    subprocess.call(["/home/linux1/WCSIBM/python/data-trans/progenroll-trans.py"])
     subprocess.call(["/home/linux1/WCSIBM/python/data-trans/program-trans.py"])
     subprocess.call(["/home/linux1/WCSIBM/python/data-trans/programreq-trans.py"])
     subprocess.call(["/home/linux1/WCSIBM/python/data-trans/room-trans.py"])
