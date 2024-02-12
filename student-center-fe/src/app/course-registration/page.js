@@ -2,18 +2,33 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/router';
 import Header from '@/components/header';
 import MyCalendarPage from '@/components/calendar';
 
 const CourseRegistration = () => {
-    const [activeMenu, setActiveMenu] = useState('schedule');
     const [date, setDate] = useState(new Date());
     const router = useRouter();
+
+    const [activeMenu, setActiveMenu] = useState('schedule');
+    
+    useEffect(() => {
+        const menuFromSessionStorage = sessionStorage.getItem("searching");
+        console.log("first checkpoint")
+        console.log(sessionStorage.getItem("searching"))
+        if (menuFromSessionStorage) {
+            console.log("we cooking")
+            console.log(menuFromSessionStorage)
+          setActiveMenu(menuFromSessionStorage);
+        }
+      }, []);
+
 
     const [courses, setCourses] = useState([]);
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
+    
     //useState for course information
     const [isInfo, setInfo] = useState(false);
     const handleInfo = () => {
