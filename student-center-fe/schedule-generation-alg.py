@@ -1,6 +1,9 @@
 import ibm_db
 from datetime import datetime
 import random
+import sys
+import json
+import requests
 
 dsn = (
     "DATABASE=WCS2024;"
@@ -11,15 +14,15 @@ dsn = (
     "PWD=Zmframewcs_54379@;"
 )
 
+
+
 conn = ibm_db.connect(dsn, '', '')
 
 def connect_to_db(dsn):
     try:
         db_conn = ibm_db.connect(dsn, "", "")
-        print("Connected to the database successfully.")
         return db_conn
     except Exception as e:
-        print("An error occurred while connecting to the database:", e)
         return None
 
 def get_program_id_for_student(student_id, db_conn):
@@ -49,7 +52,7 @@ def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
 
     # Fetch essay courses with their times
     essay_query = """
-    SELECT c.COURSEID, l.STARTTIME, l.ENDTIME, l.WEEKDAY
+    SELECT c.COURSEID, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE
     FROM STUCENTR.Course c
     JOIN STUCENTR.Lecture l ON c.COURSEID = l.COURSEID
     WHERE c.ESSAYCREDIT = 'Y'
@@ -63,7 +66,7 @@ def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
 
     # Fetch breadth courses with their times
     breadth_query = """
-    SELECT c.COURSEID, l.STARTTIME, l.ENDTIME, l.WEEKDAY, c.BREADTH
+    SELECT c.COURSEID, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE, c.BREADTH
     FROM STUCENTR.Course c
     JOIN STUCENTR.Lecture l ON c.COURSEID = l.COURSEID
     WHERE c.BREADTH IN ('SS', 'AH')
@@ -90,8 +93,11 @@ def check_prerequisites(course_id, student_id, db_conn):
         
         # Check if the student has completed this prerequisite
         completion_query = f"SELECT * FROM STUCENTR.PrevEnrollment WHERE StudentID = '{student_id}' AND CourseID = '{prerequisite_course_id}'"
+        completion_query2 = "SELECT * FROM STUCENTR.Enrollment WHERE StudentID = '{student_id}' AND CourseID = '{prerequisite_course_id}'"
         completion_stmt = ibm_db.exec_immediate(db_conn, completion_query)
-        if not ibm_db.fetch_assoc(completion_stmt):
+        completion_stmt2 = ibm_db.exec_immediate(db_conn, completion_query2)
+        
+        if not ibm_db.fetch_assoc(completion_stmt) or ibm_db.fetch_assoc(completion_stmt2): 
             # If any prerequisite is not met, set prerequisites_met to False
             prerequisites_met = False
             break  # No need to check further prerequisites if one is missing
@@ -106,32 +112,37 @@ def find_course_times(course_id, db_conn):
     lab_times = []
 
     # SQL query to find lecture times for the course
-    lecture_query = f"SELECT STARTTIME, ENDTIME, WEEKDAY FROM STUCENTR.Lecture WHERE COURSEID = '{course_id}'"
+    lecture_query = f"SELECT STARTTIME, ENDTIME, WEEKDAY, STARTDATE, ENDDATE FROM STUCENTR.Lecture WHERE COURSEID = '{course_id}'"
     lecture_stmt = ibm_db.exec_immediate(db_conn, lecture_query)
     
     lecture_row = ibm_db.fetch_assoc(lecture_stmt)
-    while lecture_row:
-        # Append each found lecture time to the lecture_times list
+    while True:
+        lecture_row = ibm_db.fetch_assoc(lecture_stmt)
+        if not lecture_row:  # If fetch_assoc returns False, break out of the loop
+            break
         lecture_times.append({
             'STARTTIME': lecture_row['STARTTIME'],
             'ENDTIME': lecture_row['ENDTIME'],
-            'WEEKDAY': lecture_row['WEEKDAY']
+            'WEEKDAY': lecture_row['WEEKDAY'],
+            'STARTDATE': lecture_row['STARTDATE'],
+            'ENDDATE': lecture_row['ENDDATE']
         })
-        lecture_row = ibm_db.fetch_assoc(lecture_stmt)
 
     # SQL query to find lab times for the course
-    lab_query = f"SELECT STARTTIME, ENDTIME, WEEKDAY FROM STUCENTR.Lab WHERE COURSEID = '{course_id}'"
+    lab_query = f"SELECT STARTTIME, ENDTIME, WEEKDAY, STARTDATE, ENDDATE FROM STUCENTR.Lab WHERE COURSEID = '{course_id}'"
     lab_stmt = ibm_db.exec_immediate(db_conn, lab_query)
     
-    lab_row = ibm_db.fetch_assoc(lab_stmt)
-    while lab_row:
-        # Append each found lab time to the lab_times list
+    while True:
+        lab_row = ibm_db.fetch_assoc(lab_stmt)
+        if not lab_row:  # If fetch_assoc returns False, break out of the loop
+            break
         lab_times.append({
             'STARTTIME': lab_row['STARTTIME'],
             'ENDTIME': lab_row['ENDTIME'],
-            'WEEKDAY': lab_row['WEEKDAY']
+            'WEEKDAY': lab_row['WEEKDAY'],
+            'STARTDATE': lab_row['STARTDATE'], 
+            'ENDDATE': lab_row['ENDDATE']
         })
-        lab_row = ibm_db.fetch_assoc(lab_stmt)
 
     return lecture_times, lab_times
 
@@ -145,6 +156,8 @@ def check_time_conflicts(new_time, scheduled_times):
         new_start = new_time['STARTTIME']
         new_end = new_time['ENDTIME']
     new_weekday = new_time['WEEKDAY']
+    
+
 
     for scheduled_time in scheduled_times:
         if isinstance(scheduled_time['STARTTIME'], str):
@@ -168,27 +181,30 @@ def check_time_conflicts(new_time, scheduled_times):
 
 def has_taken_course(student_id, course_id, db_conn):
     prev_enrollment_query = f"SELECT * FROM STUCENTR.PrevEnrollment WHERE StudentID = '{student_id}' AND COURSEID = '{course_id}'"
+    curr_enrollment_query = f"SELECT * FROM STUCENTR.Enrollment WHERE StudentID = '{student_id}' AND COURSEID = '{course_id}'"
     stmt = ibm_db.exec_immediate(db_conn, prev_enrollment_query)
-    return bool(ibm_db.fetch_assoc(stmt))
-
+    stmt2 = ibm_db.exec_immediate(db_conn, curr_enrollment_query)
+    
+    if bool(ibm_db.fetch_assoc(stmt)) or bool(ibm_db.fetch_assoc(stmt2)):
+        return True
+    else:
+        return False
+    
 def add_course_to_schedule(course, schedule):
     # Check for conflicts with lecture time
     lecture_conflict = check_time_conflicts(course['LectureTime'], schedule)
     if lecture_conflict:
-        print(f"Conflict detected for lecture of course {course['COURSEID']}. Cannot add to schedule.")
         return False  # Indicates the course was not added due to conflict
 
     # Check for conflicts with lab time
     lab_conflict = check_time_conflicts(course['LabTime'], schedule)
     if lab_conflict:
-        print(f"Conflict detected for lab of course {course['COURSEID']}. Cannot add to schedule.")
         return False  # Indicates the course was not added due to conflict
 
     # If no conflicts, add lecture and lab to schedule
     schedule.append({'CourseID': course['COURSEID'], 'Type': 'Lecture', **course['LectureTime']})
     schedule.append({'CourseID': course['COURSEID'], 'Type': 'Lab', **course['LabTime']})
 
-    print(f"Course {course['COURSEID']} added to schedule.")
     return True  # Indicates the course was successfully added
 
 def schedule_remaining_courses(db_conn, student_id, scheduled_courses):
@@ -221,12 +237,10 @@ def schedule_remaining_courses(db_conn, student_id, scheduled_courses):
 def generate_schedule(student_id):
     db_conn = connect_to_db(dsn)
     if not db_conn:
-        print("Failed to connect to the database.")
         return
 
     program_id = get_program_id_for_student(student_id, db_conn)
     if not program_id:
-        print(f"No program found for student ID {student_id}.")
         return
 
     required_courses = fetch_program_requirements(program_id, db_conn)
@@ -251,6 +265,7 @@ def generate_schedule(student_id):
             continue
 
         lecture_times, lab_times = find_course_times(course_id, db_conn)
+
         for lecture_time, lab_time in zip(lecture_times, lab_times):
             if not check_time_conflicts(lecture_time, potential_courses) and not check_time_conflicts(lab_time, potential_courses):
                 potential_courses.append({'COURSEID': course_id, 'Type': 'Lecture', **lecture_time})
@@ -279,6 +294,7 @@ def generate_schedule(student_id):
         potential_courses = [course for course in potential_courses if course['COURSEID'] != chosen_course['COURSEID']]
       
         counter += 1 
+        
            
     if num_courses_scheduled < 5:
         essay_courses, breadth_courses = fetch_requirement_courses(db_conn, student_id, scheduled_courses)
@@ -292,34 +308,57 @@ def generate_schedule(student_id):
         while num_courses_scheduled < 5 and combined_courses:
             # Select a course from the combined list
             chosen_course = combined_courses.pop()
-            
             # Check for time conflicts with already scheduled courses
             if not check_time_conflicts(chosen_course, scheduled_courses):
                 # Add the chosen course to the schedule
                 scheduled_courses.append(chosen_course)
                 # Add the time of the chosen course to scheduled_times for future conflict checks
-                scheduled_times.append({'STARTTIME': chosen_course['STARTTIME'], 'ENDTIME': chosen_course['ENDTIME'], 'WEEKDAY': chosen_course['WEEKDAY']})
+                scheduled_times.append({
+                    'STARTTIME': chosen_course['STARTTIME'], 
+                    'ENDTIME': chosen_course['ENDTIME'], 
+                    'WEEKDAY': chosen_course['WEEKDAY'], 
+                    })
                 num_courses_scheduled += 1
+                
 
-    counter = 0
+    all_courses_data = []
 
-    # Print the final schedule
-    print('\nSCHEDULE INFO:\n')
     for course in scheduled_courses:
+        # Prepare the course data dictionary
+        course_data = {
+            "COURSEID": course['COURSEID'],
+            "TYPE": course.get('Type', ''),  # Use .get() to handle missing 'Type' key gracefully
+            "STARTTIME": course['STARTTIME'].strftime('%H:%M:%S') if hasattr(course['STARTTIME'], 'strftime') else course['STARTTIME'],
+            "ENDTIME": course['ENDTIME'].strftime('%H:%M:%S') if hasattr(course['ENDTIME'], 'strftime') else course['ENDTIME'],
+            "WEEKDAY": course['WEEKDAY'],
+            "STARTDATE": course['STARTDATE'].isoformat() if hasattr(course['STARTDATE'], 'isoformat') else course['STARTDATE'],
+            "ENDDATE": course['ENDDATE'].isoformat() if hasattr(course['ENDDATE'], 'isoformat') else course['ENDDATE']
+        }
         
-        if 'Type' in course:
-            print(f"COURSEID: {course['COURSEID']}, Type: {course['Type']}, StartTime: {course['STARTTIME']}, EndTime: {course['ENDTIME']}, Day in week: {course['WEEKDAY']}")
-            counter += 1
-        else:
-            
-            print(f"COURSEID: {course['COURSEID']}, StartTime: {course['STARTTIME']}, EndTime: {course['ENDTIME']}, Day in week: {course['WEEKDAY']}")
-            counter += 1
-        
-        
-        if counter % 2 == 0:
-            print('\n')
+        all_courses_data.append(course_data)
+
+    # Convert the list of all course data dictionaries to a JSON string
+    final_json_output = json.dumps(all_courses_data, indent=4)
+    
+    print(final_json_output)
     
     ibm_db.close(db_conn)
 
-# Example call to generate_schedule
+
+        
+def main(student_id):
+    scheduled_courses = generate_schedule(student_id)
+    final_json_output = json.dumps(scheduled_courses, indent=4)
+    print(final_json_output)  
+
+
 generate_schedule('823321975')
+
+# if __name__ == "__main__":
+#     if len(sys.argv) > 1:
+#         studentID = sys.argv[1]
+#         main(studentID)
+#     else:
+#         print("No student ID provided")
+#         sys.exit(1)
+
