@@ -1,5 +1,8 @@
 // components/Header.js
+
 import { useRouter } from 'next/navigation';
+sessionStorage.setItem("searching","")
+// import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { FaArrowLeft, FaArrowRight, FaHeart, FaClock, FaSearch } from 'react-icons/fa';
 import Image from 'next/image';
@@ -14,10 +17,10 @@ const Header = () => {
     const autoCompleteOptions = ['Your Schedule', 'Add Course', 'Drop Course', 'Swap Course'];
 
     const searchRoutes = {
-        'your schedule': '/schedule',
-        'add course': '/course-registration?menu=addCourse',
-        'drop course': '/course-registration?menu=dropCourse',
-        'swap course': '/course-registration?menu=swapCourse',
+        'Your Schedule': ['/course-registration','schedule'],
+        'Add Course': ['/course-registration','addCourse'],
+        'Drop Course': ['/course-registration','dropCourse'],
+        'Swap Course': ['/course-registration','swapCourses'],
 
     };
 
@@ -25,11 +28,15 @@ const Header = () => {
         option.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleSearchSubmit = (event) => {
-        event.preventDefault();
-        const searchKey = searchTerm.toLowerCase().trim(); // Normalize the search term
-        const routePath = searchRoutes[searchKey];
+    const handleSearchSubmit = (event,searchKey) => {
+        // event.preventDefault();
+        // const searchKey = searchTerm.toLowerCase().trim(); // Normalize the search term
+        console.log(searchKey)
+        const routePath = searchRoutes[searchKey][0];
+        const action = searchRoutes[searchKey][1]
         if (routePath) {
+            sessionStorage.setItem("searching",action)
+            console.log(sessionStorage.getItem("searching"))
             router.push(routePath);
         } else {
             console.log('No matching section found for:', searchTerm);
@@ -83,14 +90,18 @@ const Header = () => {
                 {/* Autocomplete Dropdown */}
                 {showAutoComplete && searchTerm && (
                     <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg z-10">
+                    
                         {filteredOptions.map((option, index) => (
                             <div
                                 key={index}
                                 onMouseDown={() => { // Use onMouseDown instead of onClick to handle focus-related issues
+                                    console.log(option)
                                     setSearchTerm(option);
+                                    
                                     setShowAutoComplete(false);
-                                    handleSearchSubmit(option); // Pass the selected option to handleSearchSubmit
-                                }}
+                                    handleSearchSubmit(option,option); // Pass the selected option to handleSearchSubmit
+                                    }}
+                                
                                 className="p-2 hover:bg-gray-100 cursor-pointer text-black"
                             >
                                 {option}

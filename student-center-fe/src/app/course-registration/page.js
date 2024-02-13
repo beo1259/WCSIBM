@@ -2,17 +2,38 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/router';
 import Header from '@/components/header';
 import MyCalendarPage from '@/components/calendar';
 
 const CourseRegistration = () => {
-    const [activeMenu, setActiveMenu] = useState('schedule');
     const [date, setDate] = useState(new Date());
     const router = useRouter();
+
+    const [activeMenu, setActiveMenu] = useState('schedule');
+    
+    useEffect(() => {
+        const menuFromSessionStorage = sessionStorage.getItem("searching");
+        console.log("first checkpoint")
+        console.log(sessionStorage.getItem("searching"))
+        if (menuFromSessionStorage) {
+            console.log("we cooking")
+            console.log(menuFromSessionStorage)
+          setActiveMenu(menuFromSessionStorage);
+        }
+      }, []);
+
 
     const [courses, setCourses] = useState([]);
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+
+    
+    //useState for course information
+    const [isInfo, setInfo] = useState(false);
+    const handleInfo = () => {
+        setInfo(!isInfo);
+    }
 
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value.toLowerCase());
@@ -114,7 +135,7 @@ const CourseRegistration = () => {
                                 <MyCalendarPage />
                             </div>
                         )}
-                        {activeMenu === 'addCourse' && (
+                        {activeMenu === 'addCourse' && !isInfo && (
                             <div>
                                 <h2 className="text-2xl font-semibold mb-2">Add Course</h2>
                                 <input
@@ -127,7 +148,7 @@ const CourseRegistration = () => {
                                     {filteredCourses.map((course) => (
                                         <button
                                             key={course.COURSEID}
-                                            onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
+                                            onClick={handleInfo}
                                             className="block w-full text-left p-2 bg-purple-200 rounded hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
                                         >
                                             {course.COURSEID} - {course.COURSENAME}
@@ -136,8 +157,13 @@ const CourseRegistration = () => {
                                 </div>
                             </div>
                         )}
-
-
+                        {activeMenu === 'addCourse' && isInfo && (
+                            <div>
+                                <p className='mx-6'>hello</p>
+                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6 origin-bottom-right' onClick={handleInfo}>Back</button>
+                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6 origin-bottom-right' onClick={handleInfo}>Enroll</button>
+                            </div>
+                        )}
                         {activeMenu === 'dropCourse' && (
                             <div>
                                 <h2 className="text-2xl font-semibold mb-2">Drop Course</h2>
