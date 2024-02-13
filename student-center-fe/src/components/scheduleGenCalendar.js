@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -9,20 +9,102 @@ const ScheduleGenerationCalendar = () => {
     const [lectures, setLectures] = useState([]);
     const [isLoading, setIsLoading] = useState(false); // New loading state
 
-    const scheduleInfo = async () => {
-        setIsLoading(true); // Start loading
-        setLectures([]); // Clear the calendar while loading
+    function calculateCourseTotals(courses) {
+        // Initialize counts
+        let breadthAHCount = 0;
+        let breadthSSCount = 0;
+        let breadthSTCount = 0;
+        let essayCreditCount = 0;
+
+        // Iterate over the courses and increment counts accordingly
+        courses.forEach(course => {
+            if (course.BREADTH === 'AH') breadthAHCount++;
+            if (course.BREADTH === 'SS') breadthSSCount++;
+            if (course.BREADTH === 'ST') breadthSTCount++;
+            if (course.ESSAYCREDIT === 'Y') essayCreditCount++;
+        });
+        
+        let finalAH = 2 - breadthAHCount;
+        let finalSS = 2 - breadthSSCount;
+        let finalST = 2 - breadthSTCount;
+        let finalEssay = 4 - essayCreditCount;
+
+        if (finalAH < 0) {
+            finalAH = 0
+        }
+        if (finalSS < 0) {
+            finalSS = 0
+        }
+        if (finalST < 0) {
+            finalST = 0
+        }
+        if (finalEssay < 0){
+            finalEssay = 0
+        }
+
+
+        return { finalAH, finalSS, finalST, finalEssay };
+    }
+
+    // Add a state to hold the course totals
+    const [courseTotals, setCourseTotals] = useState({
+        breadthAHCount: 0,
+        breadthSSCount: 0,
+        breadthSTCount: 0,
+        essayCreditCount: 0,
+    });
+
+    useEffect(() => {
         let stuCalendarID = sessionStorage.getItem('studentId');
+        if (stuCalendarID) {
+            fetchStudentCourses(stuCalendarID);
+        }
+    }, []);
+
+    async function fetchStudentCourses(stuCalendarID) {
         try {
-            const response = await fetch(`http://localhost:3005/generate-schedule?studentID=${stuCalendarID}`, {
-                method: 'POST',
+            const url = `http://localhost:3005/course-category?studentID=${stuCalendarID}`;
+            const response = await fetch(url, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
 
             if (!response.ok) {
-                throw new Error('Failed to fetch data');
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const totals = calculateCourseTotals(data);
+            // Update state with the new totals
+            setCourseTotals(totals);
+            console.log('Breadth and EssayCredit Data:', data);
+
+            data.forEach(course => {
+                console.log(`CourseID: ${course.CourseID}, Breadth: ${course.Breadth}, EssayCredit: ${course.EssayCredit}`);
+            });
+        } catch (error) {
+            console.error('Error fetching student courses:', error);
+        }
+    }
+
+
+    const scheduleInfo = async () => {
+        setIsLoading(true); // Start loading
+        setLectures([]); // Clear the calendar while loading
+        let stuCalendarID = sessionStorage.getItem('studentId');
+        try {
+            const response = await fetch('http://localhost:3005/generate-schedule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ studentID: stuCalendarID }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
 
             const data = await response.json();
@@ -93,7 +175,19 @@ const ScheduleGenerationCalendar = () => {
                     className: 'text-xs',
                 })}
             />
+            <div className="mt-6">
+            <p>You still need <span className="font-bold">{courseTotals.finalSS} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category A 'Social Science'</a></span> course(s)</p>
+
+                <p>You still need <span className="font-bold">{courseTotals.finalAH} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category B 'Arts and Humanities'</a></span>course(s)</p>
+
+                <p>You still need <span className="font-bold">{courseTotals.finalST} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category C 'STEM'</a></span>  course(s)</p>
+
+                <p>You still need <span className="font-bold">{courseTotals.finalEssay} </span><span className="underline"><a href="https://www.uwo.ca/univsec/pdf/academic_policies/registration_progression_grad/coursenumbering.pdf" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Essay</a></span> course(s)</p>
+
+            </div>
+
         </div>
+
     );
 };
 

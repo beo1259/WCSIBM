@@ -24,10 +24,67 @@ const sessionConfig = {
 
 const connStr =
   `DATABASE=WCS2024;HOSTNAME=148.100.78.14;PORT=50000;PROTOCOL=TCPIP;UID=db2inst1;PWD=Zmframewcs_54379@;`
+
+app.get('/course-category', (req, res) => {
+  const studentID = req.query.studentID; // Accessing the studentID sent as a query string
+
+  if (!studentID) {
+    return res.status(400).send('Student ID is required');
+  }
+
+  const sqlQuery = `
+        SELECT 
+            s.StudentID,
+            c.CourseID,
+            c.CourseName,
+            c.Breadth,
+            c.EssayCredit
+        FROM 
+            STUCENTR.Student s
+        JOIN 
+            STUCENTR.Enrollment e ON s.StudentID = e.StudentID
+        JOIN 
+            STUCENTR.Course c ON e.CourseID = c.CourseID
+        WHERE 
+            s.StudentID = ? AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
+        UNION
+        SELECT 
+            s.StudentID,
+            c.CourseID,
+            c.CourseName,
+            c.Breadth,
+            c.EssayCredit
+        FROM 
+            STUCENTR.Student s
+        JOIN 
+            STUCENTR.PrevEnrollment pe ON s.StudentID = pe.StudentID
+        JOIN 
+            STUCENTR.Course c ON pe.CourseID = c.CourseID
+        WHERE 
+            s.StudentID = ? AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
+        ORDER BY 
+            CourseID
+    `;
+
+  ibmdb.open(connStr, (err, conn) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    conn.query(sqlQuery, [studentID, studentID], (err, data) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.status(200).json(data);
+      }
+      conn.close();
+    });
+  });
+});
+
 app.post('/generate-schedule', (req, res) => {
   const { studentID } = req.body;
   const script = spawn('python', ['./schedule-generation-alg.py', studentID]);
-
   let outputData = '';
 
   // Listen for data from the script
@@ -140,7 +197,6 @@ app.get('/api/student-lectures', (req, res) => {
       return res.status(500).json({ error: 'Unable to connect to the database' });
     }
 
-    // Use the provided SQL command and modify it to use the parameterized studentId
     const query = `
         SELECT L.*
         FROM STUCENTR.Lecture L
@@ -208,7 +264,6 @@ app.get('/api/student-program', (req, res) => {
       return res.status(500).json({ error: 'Unable to connect to the database' });
     }
 
-    // Use the provided SQL command and modify it to use the parameterized studentId
     const query = `
         SELECT S.YEAR, P.PROGRAMNAME
         FROM STUCENTR.PROGRAM P
@@ -223,7 +278,6 @@ app.get('/api/student-program', (req, res) => {
         conn.close();
         return res.status(500).json({ error: 'Failed to retrieve program information' });
       }
-      // Process the data to fit the schedule format if needed, or send as is
       res.json(data);
       conn.close();
     });
