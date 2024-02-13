@@ -49,6 +49,13 @@ INSERT INTO STUCENTR.Professor (ProfessorID, ProgramID, FirstName, LastName) VAL
 
 SELECT DISTINCT(STUDENTID) FROM STUCENTR.PREVENROLLMENT;
 
+DELETE FROM STUCENTR.Enrollment WHERE CourseID = 'PSY2032';
+
+INSERT INTO STUCENTR.Enrollment (EnrollmentID, CourseID, StudentID) VALUES (986234, 'CS2212', 823321975);
+INSERT INTO STUCENTR.Enrollment (EnrollmentID, CourseID, StudentID) VALUES (491234, 'CS2208', 823321975);
+INSERT INTO STUCENTR.Enrollment (EnrollmentID, CourseID, StudentID) VALUES (218423, 'CS2209', 823321975);
+INSERT INTO STUCENTR.Enrollment (EnrollmentID, CourseID, StudentID) VALUES (231943, 'HIS2177', 823321975);
+INSERT INTO STUCENTR.Enrollment (EnrollmentID, CourseID, StudentID) VALUES (732145, 'PHIL2343E', 823321975);
 
 
 INSERT INTO STUCENTR.Course (CourseID, ProgramID, ProfessorID, CourseName, Credit) VALUES ('PSY2032', 3, 918194875, 'Psych Of Crime & Corrections', 1);
