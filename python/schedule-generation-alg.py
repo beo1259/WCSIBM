@@ -42,9 +42,10 @@ def fetch_program_requirements(program_id, db_conn):
         course_row = ibm_db.fetch_assoc(stmt)
     
     return required_courses
+
 def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
     essay_courses = []
-    breadth_courses = {'ST': [], 'SS': [], 'AH': []}
+    breadth_courses = {'SS': [], 'AH': []}
 
     # Fetch essay courses with their times
     essay_query = """
@@ -65,7 +66,7 @@ def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
     SELECT c.COURSEID, l.STARTTIME, l.ENDTIME, l.WEEKDAY, c.BREADTH
     FROM STUCENTR.Course c
     JOIN STUCENTR.Lecture l ON c.COURSEID = l.COURSEID
-    WHERE c.BREADTH IN ('ST', 'SS', 'AH')
+    WHERE c.BREADTH IN ('SS', 'AH')
     """
     breadth_stmt = ibm_db.exec_immediate(db_conn, breadth_query)
     breadth_row = ibm_db.fetch_assoc(breadth_stmt)
@@ -76,8 +77,6 @@ def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
         breadth_row = ibm_db.fetch_assoc(breadth_stmt)
 
     return essay_courses, breadth_courses
-
-
 
 def check_prerequisites(course_id, student_id, db_conn):
     # Query to find the prerequisite courses for the given course_id
@@ -208,7 +207,7 @@ def schedule_remaining_courses(db_conn, student_id, scheduled_courses):
 
     # Schedule breadth courses if needed, ensuring 2 courses from the breadth categories are selected
     breadth_needed = 2  # Assuming 2 breadth courses are needed
-    for category in ['ST', 'SS', 'AH']:
+    for category in ['SS', 'AH']:
         while breadth_courses[category] and breadth_needed > 0 and slots_left > 0:
             course = breadth_courses[category].pop(0)  # Select the first available course in the category
             if add_course_to_schedule(course, scheduled_courses):
@@ -232,6 +231,9 @@ def generate_schedule(student_id):
 
     required_courses = fetch_program_requirements(program_id, db_conn)
     max_required_courses = random.choice([3, 4])
+    
+    potential_courses = []
+    
     scheduled_courses = []  # To store scheduled course details
     scheduled_times = []  # To store only the times for conflict checking
     num_courses_scheduled = 0  # Track the number of scheduled courses
@@ -243,38 +245,61 @@ def generate_schedule(student_id):
             break
 
         if has_taken_course(student_id, course_id, db_conn):
-            print(f"Student {student_id} has already taken course {course_id}. Skipping.")
             continue
 
         if not check_prerequisites(course_id, student_id, db_conn):
-            print(f"Prerequisites for course {course_id} not met by student {student_id}. Skipping.")
             continue
 
         lecture_times, lab_times = find_course_times(course_id, db_conn)
         for lecture_time, lab_time in zip(lecture_times, lab_times):
-            # Assuming that lecture_times and lab_times are aligned and both exist for each course
-            if not check_time_conflicts(lecture_time, scheduled_times) and not check_time_conflicts(lab_time, scheduled_times):
-                scheduled_courses.append({'COURSEID': course_id, 'Type': 'Lecture', **lecture_time})
-                scheduled_courses.append({'COURSEID': course_id, 'Type': 'Lab', **lab_time})
-                scheduled_times.append(lecture_time)
-                scheduled_times.append(lab_time)
-                num_courses_scheduled += 1
-                print(f"Course {course_id} added to schedule with lecture and lab.")
-                break  # Found a non-conflicting time, move to the next course
+            if not check_time_conflicts(lecture_time, potential_courses) and not check_time_conflicts(lab_time, potential_courses):
+                potential_courses.append({'COURSEID': course_id, 'Type': 'Lecture', **lecture_time})
+                potential_courses.append({'COURSEID': course_id, 'Type': 'Lab', **lab_time})
 
-    # Fetch and schedule essay and breadth requirement courses if needed
+    courseids_selected = []
+    scheduled_courses = []
+    
+    num_required = random.choice([3, 4])
+    counter = 0
+    while len(scheduled_courses) < num_required*2 and potential_courses:
+        # Select a course
+        chosen_course = random.choice([course for course in potential_courses if course['Type'] == 'Lecture' and course['COURSEID'] not in courseids_selected])
+
+        # Schedule the chosen lecture
+        scheduled_courses.append(chosen_course)
+        courseids_selected.append(chosen_course['COURSEID'])
+
+        # Find and schedule the corresponding lab, if it exists
+        corresponding_lab = next((lab for lab in potential_courses if lab['COURSEID'] == chosen_course['COURSEID'] and lab['Type'] == 'Lab'), None)
+        if corresponding_lab:
+            scheduled_courses.append(corresponding_lab)
+            num_courses_scheduled += 1
+
+        # Remove the chosen lecture and lab from potential courses
+        potential_courses = [course for course in potential_courses if course['COURSEID'] != chosen_course['COURSEID']]
+      
+        counter += 1 
+           
     if num_courses_scheduled < 5:
         essay_courses, breadth_courses = fetch_requirement_courses(db_conn, student_id, scheduled_courses)
-        # Try to add essay and breadth courses to fill the schedule up to 5 courses
-        for course_list in [essay_courses] + list(breadth_courses.values()):
-            for course in course_list:
-                if num_courses_scheduled >= 5:
-                    break  # Schedule is full
-                if not check_time_conflicts(course, scheduled_times):
-                    scheduled_courses.append(course)
-                    scheduled_times.append(course)
-                    num_courses_scheduled += 1
-                    print(f"Course {course['COURSEID']} added to fulfill breadth/essay requirement.")
+        
+        # Combine essay and breadth courses into a single list for random selection
+        combined_courses = essay_courses + [course for sublist in breadth_courses.values() for course in sublist]
+        
+        # Shuffle the combined list to ensure random selection
+        random.shuffle(combined_courses)
+        
+        while num_courses_scheduled < 5 and combined_courses:
+            # Select a course from the combined list
+            chosen_course = combined_courses.pop()
+            
+            # Check for time conflicts with already scheduled courses
+            if not check_time_conflicts(chosen_course, scheduled_courses):
+                # Add the chosen course to the schedule
+                scheduled_courses.append(chosen_course)
+                # Add the time of the chosen course to scheduled_times for future conflict checks
+                scheduled_times.append({'STARTTIME': chosen_course['STARTTIME'], 'ENDTIME': chosen_course['ENDTIME'], 'WEEKDAY': chosen_course['WEEKDAY']})
+                num_courses_scheduled += 1
 
     counter = 0
 
@@ -283,13 +308,14 @@ def generate_schedule(student_id):
     for course in scheduled_courses:
         
         if 'Type' in course:
-            print(f"COURSEID: {course['COURSEID']}, Type: {course['Type']}, StartTime: {course['STARTTIME']}, EndTime: {course['ENDTIME']}")
+            print(f"COURSEID: {course['COURSEID']}, Type: {course['Type']}, StartTime: {course['STARTTIME']}, EndTime: {course['ENDTIME']}, Day in week: {course['WEEKDAY']}")
+            counter += 1
         else:
             
-            print(f"COURSEID: {course['COURSEID']}, StartTime: {course['STARTTIME']}, EndTime: {course['ENDTIME']}")
-            print('\n')
+            print(f"COURSEID: {course['COURSEID']}, StartTime: {course['STARTTIME']}, EndTime: {course['ENDTIME']}, Day in week: {course['WEEKDAY']}")
+            counter += 1
         
-        counter += 1
+        
         if counter % 2 == 0:
             print('\n')
     
