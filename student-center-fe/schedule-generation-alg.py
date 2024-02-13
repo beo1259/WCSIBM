@@ -347,18 +347,16 @@ def generate_schedule(student_id):
 
         
 def main(student_id):
-    scheduled_courses = generate_schedule(student_id)
-    final_json_output = json.dumps(scheduled_courses, indent=4)
-    print(final_json_output)  
+    generate_schedule(studentID)
 
 
-generate_schedule('823321975')
+# generate_schedule('823321975')
 
-# if __name__ == "__main__":
-#     if len(sys.argv) > 1:
-#         studentID = sys.argv[1]
-#         main(studentID)
-#     else:
-#         print("No student ID provided")
-#         sys.exit(1)
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        studentID = sys.argv[1]
+        main(studentID)
+    else:
+        print("No student ID provided")
+        sys.exit(1)
 
