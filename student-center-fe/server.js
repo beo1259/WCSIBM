@@ -93,22 +93,14 @@ app.post('/generate-schedule', (req, res) => {
   });
 
   script.on('close', (code) => {
-    console.log(`Child process exited with code ${code}`);
     // Send response when the script finishes
     res.status(200).json(JSON.parse(outputData));
-    console.log(JSON.parse(outputData))
   });
 
   script.on('error', (error) => {
     console.error('Error executing script:', error);
     res.status(500).json({ error: 'An error occurred during schedule generation' });
   });
-});
-
-app.get('/schedule-json', (req, res) => {
-  const data = req.body;
-  console.log(data)
-  res.json(data);
 });
 
 app.post('/api/login', (req, res) => {
