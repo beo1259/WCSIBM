@@ -168,7 +168,7 @@ const ScheduleGenerationCalendar = () => {
                 startAccessor="start"
                 endAccessor="end"
                 defaultView="week"
-                style={{ height: '100%' }}
+                step={30}
                 min={minTime}
                 max={maxTime}
                 eventPropGetter={(event, start, end, isSelected) => ({
@@ -176,13 +176,13 @@ const ScheduleGenerationCalendar = () => {
                 })}
             />
             <div className="mt-6">
-            <p>You still need <span className="font-bold">{courseTotals.finalSS} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category A 'Social Science'</a></span> course(s)</p>
+            <p>You still need <span className="font-bold">{courseTotals.finalSS} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category A 'Social Science'</a></span> course(s) to graduate</p>
 
-                <p>You still need <span className="font-bold">{courseTotals.finalAH} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category B 'Arts and Humanities'</a></span>course(s)</p>
+                <p>You still need <span className="font-bold">{courseTotals.finalAH} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category B 'Arts and Humanities'</a></span>course(s) to graduate</p>
 
-                <p>You still need <span className="font-bold">{courseTotals.finalST} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category C 'STEM'</a></span>  course(s)</p>
+                <p>You still need <span className="font-bold">{courseTotals.finalST} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category C 'STEM'</a></span>  course(s) to graduate</p>
 
-                <p>You still need <span className="font-bold">{courseTotals.finalEssay} </span><span className="underline"><a href="https://www.uwo.ca/univsec/pdf/academic_policies/registration_progression_grad/coursenumbering.pdf" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Essay</a></span> course(s)</p>
+                <p>You still need <span className="font-bold">{courseTotals.finalEssay} </span><span className="underline"><a href="https://www.uwo.ca/univsec/pdf/academic_policies/registration_progression_grad/coursenumbering.pdf" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Essay</a></span> course(s) to graduate</p>
 
             </div>
 
