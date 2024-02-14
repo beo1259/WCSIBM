@@ -143,15 +143,15 @@
       <div className='h-full w-full'>
         <Calendar
           localizer={localizer}
-          events={allEvents} // Here you pass the lectures state to the events prop
+          events={allEvents}
           startAccessor="start"
           endAccessor="end"
           defaultView="week"
-          style={{ height: '100%' }}
+          step={30}
           min={minTime}
           max={maxTime}
           eventPropGetter={(event, start, end, isSelected) => ({
-            className: 'text-xs', // Adjust the font size using Tailwind's text classes
+            className: 'text-xs',
           })}
         />
       </div>

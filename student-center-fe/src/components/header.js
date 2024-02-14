@@ -112,16 +112,6 @@ const Header = () => {
                     </div>
                 )}
             </div>
-
-            {/* Icons */}
-            <div className="flex items-center">
-                <button className="text-white p-2 mr-4">
-                    <FaHeart size={24} />
-                </button>
-                <button className="text-white p-2 mr-4">
-                    <FaClock size={24} />
-                </button>
-            </div>
         </div>
     );
 }
