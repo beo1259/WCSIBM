@@ -21,7 +21,7 @@ const Header = () => {
         'Add Course': ['/course-registration','addCourse'],
         'Drop Course': ['/course-registration','dropCourse'],
         'Swap Course': ['/course-registration','swapCourses'],
-        'Generate Schedule': ['course-registration','generateSchedule']
+        'Generate Schedule': ['/course-registration','generateSchedule']
 
     };
 
