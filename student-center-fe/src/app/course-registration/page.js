@@ -28,7 +28,7 @@ const CourseRegistration = () => {
       }, []);
 
 
-    const [courses, setCourses] = useState([]);
+    let [courses, setCourses] = useState([]);
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -55,7 +55,7 @@ const CourseRegistration = () => {
 
     useEffect(() => {
         if (activeMenu === 'addCourse') {
-            fetch('http://localhost:3005/api/courses')
+            fetch(`http://localhost:3005/api/courses?studentID=${stuID}`)
                 .then((response) => response.json())
                 .then((data) => {
                     setCourses(data);
@@ -65,7 +65,7 @@ const CourseRegistration = () => {
                     console.error('Error fetching courses:', error);
                 });
         }
-
+        
         const menusThatRequireEnrollmentInfo = ['dropCourse', 'swapCourses'];
         if (menusThatRequireEnrollmentInfo.includes(activeMenu) && stuID) {
             fetch(`http://localhost:3005/api/student-courses?studentId=${stuID}`)

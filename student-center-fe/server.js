@@ -131,13 +131,19 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/courses', (req, res) => {
+  const studentID = req.query.studentID;
   ibmdb.open(connStr, (err, conn) => {
     if (err) {
       console.error('db connection error:', err);
       return res.status(500).send('Unable to connect to the database');
     }
 
-    const query = `SELECT CourseID, CourseName FROM STUCENTR.Course`;
+    const query = `SELECT C.CourseID, C.CourseName 
+      FROM STUCENTR.Course C
+      LEFT JOIN STUCENTR.ENROLLMENT E 
+          ON E.COURSEID = C.COURSEID
+          AND E.STUDENTID = '${studentID}'
+      WHERE E.COURSEID IS NULL`;
 
     conn.query(query, (err, data) => {
       if (err) {
@@ -243,6 +249,7 @@ app.get('/api/student-labs', (req, res) => {
   });
 });
 
+//Get program information for a student
 app.get('/api/student-program', (req, res) => {
   const studentId = req.query.studentId;
 
