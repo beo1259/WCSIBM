@@ -33,6 +33,8 @@ def get_program_id_for_student(student_id, db_conn):
         return program_id_row['PROGRAMID']
     else:
         return None
+    
+
 
 def fetch_program_requirements(program_id, db_conn):
     required_courses_query = f"SELECT COURSEID FROM STUCENTR.ProgramReq WHERE ProgramID = '{program_id}'"
@@ -97,13 +99,12 @@ def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
             s.StudentID = ? AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
         ORDER BY 
             CourseID
-        WHERE c.BREADTH IN ('ST', 'SS', 'AH')
     """
 
     # Fetch breadth courses with their times
     breadth_query = """
-    SELECT c.COURSEID, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE, c.BREADTH
-    FROM STUCENTR.Course c
+    SELECT c.COURSEID, c.ESSAYCREDIT, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE, c.BREADTH
+    FROM STUCENTR.Course c 
     JOIN STUCENTR.Lecture l ON c.COURSEID = l.COURSEID
     WHERE c.BREADTH IN ('ST', 'SS', 'AH')
     """
@@ -111,33 +112,63 @@ def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
     breadth_stmt = ibm_db.exec_immediate(db_conn, breadth_query)
     breadth_row = ibm_db.fetch_assoc(breadth_stmt)
     
-    breadth_reqs = ibm_db.fetch_assoc(breadth_req_query)
-    
+    # Prepare the statement for the breadth requirements query
+    breadth_req_stmt = ibm_db.prepare(db_conn, breadth_req_query)
+
+    # Bind the student_id parameter twice since your query uses it in two places
+    ibm_db.bind_param(breadth_req_stmt, 1, student_id)
+    ibm_db.bind_param(breadth_req_stmt, 2, student_id)
+
+    # Execute the prepared statement
+    ibm_db.execute(breadth_req_stmt)
+
+    # Initialize counters
     st = 0
     ss = 0
     ah = 0
     essay = 0
-    
+
+    # Fetch and process results
+    breadth_reqs = ibm_db.fetch_assoc(breadth_req_stmt)
     while breadth_reqs:
+        if breadth_reqs['ESSAYCREDIT'] == 'Y':
+            essay += 1
         if breadth_reqs['BREADTH'] == 'ST':
             st += 1
-        elif breadth_reqs['BREADTH'] == 'SS':
+        if breadth_reqs['BREADTH'] == 'SS':
             ss += 1
-        elif breadth_reqs['BREADTH'] == 'AH':
+        if breadth_reqs['BREADTH'] == 'AH':
             ah += 1
-        elif breadth_reqs['ESSAYCREDIT'] == 'Y':
-            essay += 1
-        else:
-            continue
-        breadth_reqs = ibm_db.fetch_assoc(breadth_req_query)
 
+        # Fetch the next row
+        breadth_reqs = ibm_db.fetch_assoc(breadth_req_stmt)
+
+    cat_list = [st, ss, ah, essay]
+    cat_list.sort()
     
-    print(st, ss, ah, essay)
+    
+
     while breadth_row:
         if not check_time_conflicts(breadth_row, scheduled_courses):
             category = breadth_row['BREADTH']
+            essayCheck = breadth_row['ESSAYCREDIT']
 
-            breadth_courses[category].append(breadth_row)
+            # Check which course makes the most sense to add
+            if ss == st == ah == essay:
+                breadth_courses[category].append(breadth_row)
+                
+            if ((essay < ss and essay < st and essay < ah) or (essay < ss and essay < st) or (essay < ah and essay < ss) or (essay < st and essay < ah)) and essayCheck == 'Y':
+                breadth_courses[category].append(breadth_row)
+                
+            if (st > ah and ss < ah) and category == 'SS':
+                breadth_courses[category].append(breadth_row)
+    
+            if (st > ss and ah < ss) and category == 'AH':
+                breadth_courses[category].append(breadth_row)
+
+            if (st < ss and st < ah) and category == 'ST':
+                breadth_courses[category].append(breadth_row)
+            
         breadth_row = ibm_db.fetch_assoc(breadth_stmt)
 
     return essay_courses, breadth_courses
@@ -284,7 +315,7 @@ def schedule_remaining_courses(db_conn, student_id, scheduled_courses):
 
     # Schedule breadth courses if needed, ensuring 2 courses from the breadth categories are selected
     breadth_needed = 2  # Assuming 2 breadth courses are needed
-    for category in ['SS', 'AH']:
+    for category in ['ST', 'SS', 'AH']:
         while breadth_courses[category] and breadth_needed > 0 and slots_left > 0:
             course = breadth_courses[category].pop(0)  # Select the first available course in the category
             if add_course_to_schedule(course, scheduled_courses):
@@ -408,13 +439,13 @@ def main(studentID):
     generate_schedule(studentID)
 
 
-generate_schedule('823321975')
+#generate_schedule('823321975')
 
-# if __name__ == "__main__":
-#     if len(sys.argv) > 1:
-#         studentID = sys.argv[1]
-#         main(studentID)
-#     else:
-#         print("No student ID provided")
-#         sys.exit(1)
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        studentID = sys.argv[1]
+        main(studentID)
+    else:
+        print("No student ID provided")
+        sys.exit(1)
 
