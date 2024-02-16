@@ -11,6 +11,9 @@ const CourseRegistration = () => {
     const [date, setDate] = useState(new Date());
     const router = useRouter();
 
+    //Temp to display for confirmation message
+    const [tempStore, setTempStore] = useState('');
+
     const [activeMenu, setActiveMenu] = useState('schedule');
     
     useEffect(() => {
@@ -32,7 +35,8 @@ const CourseRegistration = () => {
     
     //useState for course information
     const [isInfo, setInfo] = useState(false);
-    const handleInfo = () => {
+    const handleInfo = (courseID, courseName) => {
+        setTempStore(`${courseID} - ${courseName}`);
         setInfo(!isInfo);
     }
 
@@ -150,7 +154,7 @@ const CourseRegistration = () => {
                                     {filteredCourses.map((course) => (
                                         <button
                                             key={course.COURSEID}
-                                            onClick={handleInfo}
+                                            onClick={() => handleInfo(course.COURSEID, course.COURSENAME)}
                                             className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
                                         >
                                             {course.COURSEID} - {course.COURSENAME}
@@ -159,11 +163,12 @@ const CourseRegistration = () => {
                                 </div>
                             </div>
                         )}
+                        {/*Enrollment confirmation*/}
                         {activeMenu === 'addCourse' && isInfo && (
                             <div>
-                                <p className='mx-6'>hello</p>
-                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6 origin-bottom-right' onClick={handleInfo}>Back</button>
-                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6 origin-bottom-right' onClick={handleInfo}>Enroll</button>
+                                <p className='mx-6'>Are you sure you want to enroll in {tempStore}?</p>
+                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6' onClick={handleInfo}>Back</button>
+                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6' onClick={handleInfo}>Enroll</button>
                             </div>
                         )}
                         {activeMenu === 'dropCourse' && (
