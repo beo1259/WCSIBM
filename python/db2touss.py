@@ -5,11 +5,12 @@ import ftplib
 def format_fixed_width(record):
     formatted_record = ''
     formatted_record += str(record['STUDENTID']).ljust(20)  # StudentID, left-justified, 10 characters
-    formatted_record += record['EMAIL'].ljust(30)            # EMAIL, 20 characters
-    formatted_record += record['PASS'].ljust(20)          # PASS, 30 characters
+    formatted_record += str(record['EMAIL']).ljust(30)            # EMAIL, 20 characters
+    formatted_record += str(record['PASS']).ljust(20)          # PASS, 30 characters
     formatted_record += str(record['PHONE']).ljust(25)  # PHONE, 25 characters
     formatted_record += str(record['FIRSTNAME']).ljust(30)    # FIRST NAME, 30 characters
-    formatted_record += str(record['LASTNAME']).ljust(30)      # LASTNAME, 40 characters
+    formatted_record += str(record['LASTNAME']).ljust(20)      # LASTNAME, 30 characters
+    formatted_record += str(record['YEAR']).ljust(10)   # YEAR, 10 characters
 
     return formatted_record + '\n'  # Add a newline at the end of each record
 
@@ -33,7 +34,7 @@ select = "SELECT * FROM STUCENTR.Student"
 stmt = ibm_db.exec_immediate(conn, select)
 
 # Local file for saving query results
-local_file = 'query_results.txt'
+local_file = 'student_data.txt'
 
 # Open the file for writing
 with open(local_file, 'w') as file:
@@ -50,7 +51,7 @@ ibm_db.close(conn)
 ftp_hostname = '204.90.115.200'
 ftp_username = 'z41780'
 ftp_password = 'GEM31DUN'
-remote_file_path = '/z/z41780/WCS-IBM/data/query_result.txt'
+remote_file_path = '/z/z41780/WCS-IBM/data/student_data.txt'
 
 # FTP transfer
 with ftplib.FTP(ftp_hostname) as ftp:
