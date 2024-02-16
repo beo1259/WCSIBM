@@ -12,7 +12,8 @@ const CourseRegistration = () => {
     const router = useRouter();
 
     //Temp to display for confirmation message
-    const [tempStore, setTempStore] = useState('');
+    const [tempStoreLecture, setTempStoreLecture] = useState([]);
+    const [tempStoreLab, setTempStoreLab] = useState([]);
 
     const [activeMenu, setActiveMenu] = useState('schedule');
     
@@ -35,8 +36,8 @@ const CourseRegistration = () => {
     
     //useState for course information
     const [isInfo, setInfo] = useState(false);
-    const handleInfo = (courseID, courseName) => {
-        setTempStore(`${courseID} - ${courseName}`);
+    const handleInfo = async (courseID) => {
+        courseInformation(courseID);
         setInfo(!isInfo);
     }
 
@@ -112,6 +113,25 @@ const CourseRegistration = () => {
         // Here you will eventually fetch and display the course data for the selected date
     };
 
+    //Call API to get specific course information
+    const courseInformation = async (courseID) => {
+        const response = await fetch(`http://localhost:3005/api/course-information?courseID=${courseID}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        //Separate lab and lecture data
+        let lectures = []; let labs = [];
+        for(let i=0;i<data.length;i++){
+            if(data[i].hasOwnProperty('LECTUREID'))
+                lectures.push(data[i]);
+            else
+                labs.push(data[i]);
+        }
+        setTempStoreLecture(lectures);
+        setTempStoreLab(labs);
+    }
+
     return (
         <>
             <div className="fixed top-0 left-0 w-full z-50">
@@ -154,7 +174,7 @@ const CourseRegistration = () => {
                                     {filteredCourses.map((course) => (
                                         <button
                                             key={course.COURSEID}
-                                            onClick={() => handleInfo(course.COURSEID, course.COURSENAME)}
+                                            onClick={() => handleInfo(course.COURSEID)}
                                             className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
                                         >
                                             {course.COURSEID} - {course.COURSENAME}
@@ -166,9 +186,47 @@ const CourseRegistration = () => {
                         {/*Enrollment confirmation*/}
                         {activeMenu === 'addCourse' && isInfo && (
                             <div>
-                                <p className='mx-6'>Are you sure you want to enroll in {tempStore}?</p>
-                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6' onClick={handleInfo}>Back</button>
-                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6' onClick={handleInfo}>Enroll</button>
+                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Back</button>
+                                <p>Lectures</p>
+                                <table className='w-full p-6'>
+                                    <tr className='grid grid-cols-5'>
+                                        <th>SECTION</th>
+                                        <th>ROOM</th>
+                                        <th>TIME</th>
+                                        <th>START/END DATE</th>
+                                        <th>ENROLL</th>
+                                    </tr>
+                                    {tempStoreLecture.map((value, key) => {
+                                        return(
+                                            <tr className='grid grid-cols-5 text-center'>
+                                                <td key={key}>{value.LECTUREID}</td>
+                                                <td key={key}>{value.ROOMID}</td>
+                                                <td key={key}>{value.STARTTIME} - {value.ENDTIME}</td>
+                                                <td key={key}>{value.STARTDATE} - {value.ENDDATE}</td>
+                                                <input type='checkbox' className=''></input>
+                                            </tr>
+                                        );
+                                    })}
+                                    <p>Labs</p>
+                                    <tr className='grid grid-cols-5 pt-6'>
+                                        <th>SECTION</th>
+                                        <th>ROOM</th>
+                                        <th>TIME</th>
+                                        <th>START/END DATE</th>
+                                        <th>ENROLL</th>
+                                    </tr>
+                                    {tempStoreLab.map((value, key) => {
+                                        return(
+                                            <tr className='grid grid-cols-5 text-center'>
+                                                <td key={key}>{value.LABID}</td>
+                                                <td key={key}>{value.ROOMID}</td>
+                                                <td key={key}>{value.STARTTIME} - {value.ENDTIME}</td>
+                                                <td key={key}>{value.STARTDATE} - {value.ENDDATE}</td>
+                                                <input type='checkbox' className=''></input>
+                                            </tr>
+                                        );
+                                    })}
+                                </table>
                             </div>
                         )}
                         {activeMenu === 'dropCourse' && (
