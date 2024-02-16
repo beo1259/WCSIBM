@@ -132,6 +132,7 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/courses', (req, res) => {
   const studentID = req.query.studentID;
+
   ibmdb.open(connStr, (err, conn) => {
     if (err) {
       console.error('db connection error:', err);
@@ -279,6 +280,40 @@ app.get('/api/student-program', (req, res) => {
       }
       res.json(data);
       conn.close();
+    });
+  });
+});
+
+//Get all course lecture and lab information
+app.get('/api/course-information', (req, res) => {
+  let courseID = req.query.courseID;
+
+  ibmdb.open(connStr, (err, conn) => {
+    if (err) {
+      console.error('Connection error:', err);
+      return res.status(500).json({ error: 'Unable to connect to the database' });
+    }
+
+    const query = `SELECT * FROM STUCENTR.LECTURE WHERE COURSEID='${courseID}'`;
+    const query2 = `SELECT * FROM STUCENTR.LAB WHERE COURSEID='${courseID}'`;
+    //Query lecture data
+    conn.query(query, (err, data) => {
+      if (err) {
+        console.error('Query error:', err);
+        conn.close();
+        return res.status(500).json({ error: 'Failed to retrieve program information' });
+      }
+      //Query lab data
+      conn.query(query2, (err, data2) => {
+        if (err) {
+          console.error('Query error:', err);
+          conn.close();
+          return res.status(500).json({ error: 'Failed to retrieve program information' });
+        }
+        data = data.concat(data2);
+        res.json(data);
+        conn.close();
+      });
     });
   });
 });
