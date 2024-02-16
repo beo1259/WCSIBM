@@ -311,7 +311,7 @@ app.get('/api/course-information', (req, res) => {
           return res.status(500).json({ error: 'Failed to retrieve program information' });
         }
         data = data.concat(data2);
-        res.json(data);
+        res.status(200).send(data);
         conn.close();
       });
     });
