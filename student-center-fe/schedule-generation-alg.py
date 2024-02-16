@@ -48,7 +48,7 @@ def fetch_program_requirements(program_id, db_conn):
 
 def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
     essay_courses = []
-    breadth_courses = {'SS': [], 'AH': []}
+    breadth_courses = {'ST': [], 'SS': [], 'AH': []}
 
     # Fetch essay courses with their times
     essay_query = """
@@ -63,19 +63,80 @@ def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
         if not check_time_conflicts(essay_row, scheduled_courses):
             essay_courses.append(essay_row)
         essay_row = ibm_db.fetch_assoc(essay_stmt)
+        
+    # Fetch how many breadth courses they need
+    breadth_req_query = """        
+    SELECT 
+            s.StudentID,
+            c.CourseID,
+            c.CourseName,
+            c.Breadth,
+            c.EssayCredit
+        FROM 
+            STUCENTR.Student s
+        JOIN 
+            STUCENTR.Enrollment e ON s.StudentID = e.StudentID
+        JOIN 
+            STUCENTR.Course c ON e.CourseID = c.CourseID
+        WHERE 
+            s.StudentID = ? AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
+        UNION
+        SELECT 
+            s.StudentID,
+            c.CourseID,
+            c.CourseName,
+            c.Breadth,
+            c.EssayCredit
+        FROM 
+            STUCENTR.Student s
+        JOIN 
+            STUCENTR.PrevEnrollment pe ON s.StudentID = pe.StudentID
+        JOIN 
+            STUCENTR.Course c ON pe.CourseID = c.CourseID
+        WHERE 
+            s.StudentID = ? AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
+        ORDER BY 
+            CourseID
+        WHERE c.BREADTH IN ('ST', 'SS', 'AH')
+    """
 
     # Fetch breadth courses with their times
     breadth_query = """
     SELECT c.COURSEID, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE, c.BREADTH
     FROM STUCENTR.Course c
     JOIN STUCENTR.Lecture l ON c.COURSEID = l.COURSEID
-    WHERE c.BREADTH IN ('SS', 'AH')
+    WHERE c.BREADTH IN ('ST', 'SS', 'AH')
     """
+    
     breadth_stmt = ibm_db.exec_immediate(db_conn, breadth_query)
     breadth_row = ibm_db.fetch_assoc(breadth_stmt)
+    
+    breadth_reqs = ibm_db.fetch_assoc(breadth_req_query)
+    
+    st = 0
+    ss = 0
+    ah = 0
+    essay = 0
+    
+    while breadth_reqs:
+        if breadth_reqs['BREADTH'] == 'ST':
+            st += 1
+        elif breadth_reqs['BREADTH'] == 'SS':
+            ss += 1
+        elif breadth_reqs['BREADTH'] == 'AH':
+            ah += 1
+        elif breadth_reqs['ESSAYCREDIT'] == 'Y':
+            essay += 1
+        else:
+            continue
+        breadth_reqs = ibm_db.fetch_assoc(breadth_req_query)
+
+    
+    print(st, ss, ah, essay)
     while breadth_row:
         if not check_time_conflicts(breadth_row, scheduled_courses):
             category = breadth_row['BREADTH']
+
             breadth_courses[category].append(breadth_row)
         breadth_row = ibm_db.fetch_assoc(breadth_stmt)
 
@@ -295,7 +356,6 @@ def generate_schedule(student_id):
       
         counter += 1 
         
-           
     if num_courses_scheduled < 5:
         essay_courses, breadth_courses = fetch_requirement_courses(db_conn, student_id, scheduled_courses)
         
@@ -343,20 +403,18 @@ def generate_schedule(student_id):
     print(final_json_output)
     
     ibm_db.close(db_conn)
-
-
         
-def main(student_id):
+def main(studentID):
     generate_schedule(studentID)
 
 
-# generate_schedule('823321975')
+generate_schedule('823321975')
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        studentID = sys.argv[1]
-        main(studentID)
-    else:
-        print("No student ID provided")
-        sys.exit(1)
+# if __name__ == "__main__":
+#     if len(sys.argv) > 1:
+#         studentID = sys.argv[1]
+#         main(studentID)
+#     else:
+#         print("No student ID provided")
+#         sys.exit(1)
 
