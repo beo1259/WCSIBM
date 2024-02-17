@@ -55,23 +55,23 @@ const Header = () => {
         setSearchTerm(event.target.value);
     };
     return (
-        <div className="bg-purple-700 text-white p-0 flex items-center justify-between h-16">
+        <div className="bg-purple-800 text-white p-0 flex items-center justify-between h-16 drop-shadow-lg">
             {/* Navigation Buttons */}
             <div className="flex items-center">
-                <button onClick={() => router.back()} className="text-white p-2 mr-4">
-                    <FaArrowLeft size={20} />
+                <button onClick={() => router.back()} className="text-purple p-2 mr-4">
+                    <FaArrowLeft style={{color: '#dac7ff'}} size={20} />
                 </button>
                 <button onClick={() => router.forward()} className="text-white p-2">
-                    <FaArrowRight size={20} />
+                    <FaArrowRight style={{color: '#dac7ff'}} size={20}  />
                 </button>
             </div>
 
             <button
-                className="relative w-32 h-28 mr-2"
+                className="relative w-32 h-28 ml-5"
                 onClick={() => navigateTo('/dashboard')}
             >
                 <Image
-                    src="/western-crest-facebook-og1-removebg-preview.png" // Adjust the path to your image's location
+                    src="/wcs1.png" 
                     alt="Western Logo"
                     layout="fill" // Use 'fill' for modern Next.js Image component usage
                     objectFit="contain" // This keeps the aspect ratio of the image
@@ -80,14 +80,14 @@ const Header = () => {
 
             {/* Search Bar and Autocomplete Container */}
             <div className="relative flex flex-1 mx-4 items-center">
-                <FaSearch className="ml-2" />
+                <FaSearch style={{color: '#dac7ff'}} className="ml-2" size={20}/>
                 <input
                     type="text"
                     placeholder="Search..."
                     value={searchTerm}
                     onChange={handleSearchChange}
                     onFocus={() => setShowAutoComplete(true)} // Show options when the input gains focus
-                    className="w-full p-1  ml-3 shadow-md bg-slate-200 text-black rounded-md focus:outline-none"
+                    className="w-full p-1  ml-3 shadow-md bg-slate-200 text-black rounded-md border-2 border-purple-300 focus:outline-none"
                 />
                 {/* Autocomplete Dropdown */}
                 {showAutoComplete && searchTerm && (

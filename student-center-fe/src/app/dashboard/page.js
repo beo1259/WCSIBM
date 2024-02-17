@@ -16,7 +16,7 @@ const Dashboard = () => {
       <div className="fixed top-0 left-0 w-full z-50">
         <Header />
       </div>
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-purple-800 to-purple-500">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-purple-600 to-purple-400">
         <div className="p-6 max-w-4xl w-full bg-gradient-to-r from-purple-300 to-purple-100 rounded-2xl shadow-md">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 

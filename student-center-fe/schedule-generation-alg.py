@@ -48,13 +48,13 @@ def fetch_program_requirements(program_id, db_conn):
     
     return required_courses
 
-def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
+def fetch_requirement_courses(db_conn, student_id, scheduled_courses, catA, catB, catC, catEssay):
     essay_courses = []
     breadth_courses = {'ST': [], 'SS': [], 'AH': []}
 
     # Fetch essay courses with their times
     essay_query = """
-    SELECT c.COURSEID, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE
+    SELECT c.COURSEID, c.COURSENAME, l.ROOMID, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE
     FROM STUCENTR.Course c
     JOIN STUCENTR.Lecture l ON c.COURSEID = l.COURSEID
     WHERE c.ESSAYCREDIT = 'Y'
@@ -66,108 +66,41 @@ def fetch_requirement_courses(db_conn, student_id, scheduled_courses):
             essay_courses.append(essay_row)
         essay_row = ibm_db.fetch_assoc(essay_stmt)
         
-    # Fetch how many breadth courses they need
-    breadth_req_query = """        
-    SELECT 
-            s.StudentID,
-            c.CourseID,
-            c.CourseName,
-            c.Breadth,
-            c.EssayCredit
-        FROM 
-            STUCENTR.Student s
-        JOIN 
-            STUCENTR.Enrollment e ON s.StudentID = e.StudentID
-        JOIN 
-            STUCENTR.Course c ON e.CourseID = c.CourseID
-        WHERE 
-            s.StudentID = ? AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
-        UNION
-        SELECT 
-            s.StudentID,
-            c.CourseID,
-            c.CourseName,
-            c.Breadth,
-            c.EssayCredit
-        FROM 
-            STUCENTR.Student s
-        JOIN 
-            STUCENTR.PrevEnrollment pe ON s.StudentID = pe.StudentID
-        JOIN 
-            STUCENTR.Course c ON pe.CourseID = c.CourseID
-        WHERE 
-            s.StudentID = ? AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
-        ORDER BY 
-            CourseID
-    """
+   
 
     # Fetch breadth courses with their times
     breadth_query = """
-    SELECT c.COURSEID, c.ESSAYCREDIT, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE, c.BREADTH
+    SELECT c.COURSEID, c.COURSENAME, c.ESSAYCREDIT, l.ROOMID, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE, c.BREADTH
     FROM STUCENTR.Course c 
     JOIN STUCENTR.Lecture l ON c.COURSEID = l.COURSEID
     WHERE c.BREADTH IN ('ST', 'SS', 'AH')
     """
     
+    
+    
     breadth_stmt = ibm_db.exec_immediate(db_conn, breadth_query)
     breadth_row = ibm_db.fetch_assoc(breadth_stmt)
     
-    # Prepare the statement for the breadth requirements query
-    breadth_req_stmt = ibm_db.prepare(db_conn, breadth_req_query)
 
-    # Bind the student_id parameter twice since your query uses it in two places
-    ibm_db.bind_param(breadth_req_stmt, 1, student_id)
-    ibm_db.bind_param(breadth_req_stmt, 2, student_id)
-
-    # Execute the prepared statement
-    ibm_db.execute(breadth_req_stmt)
-
-    # Initialize counters
-    st = 0
-    ss = 0
-    ah = 0
-    essay = 0
-
-    # Fetch and process results
-    breadth_reqs = ibm_db.fetch_assoc(breadth_req_stmt)
-    while breadth_reqs:
-        if breadth_reqs['ESSAYCREDIT'] == 'Y':
-            essay += 1
-        if breadth_reqs['BREADTH'] == 'ST':
-            st += 1
-        if breadth_reqs['BREADTH'] == 'SS':
-            ss += 1
-        if breadth_reqs['BREADTH'] == 'AH':
-            ah += 1
-
-        # Fetch the next row
-        breadth_reqs = ibm_db.fetch_assoc(breadth_req_stmt)
-
-    cat_list = [st, ss, ah, essay]
-    cat_list.sort()
-    
-    
 
     while breadth_row:
         if not check_time_conflicts(breadth_row, scheduled_courses):
+            
             category = breadth_row['BREADTH']
-            essayCheck = breadth_row['ESSAYCREDIT']
-
+            
+            #print(f"A: {catA} B: {catB} C: {catC} Essay: {catEssay}")
             # Check which course makes the most sense to add
-            if ss == st == ah == essay:
+            if (catA == True) and category == 'SS' :
                 breadth_courses[category].append(breadth_row)
-                
-            if ((essay < ss and essay < st and essay < ah) or (essay < ss and essay < st) or (essay < ah and essay < ss) or (essay < st and essay < ah)) and essayCheck == 'Y':
+            if (catB == True) and category == 'AH' :
                 breadth_courses[category].append(breadth_row)
-                
-            if (st > ah and ss < ah) and category == 'SS':
+            if (catC == True) and category == 'ST':
                 breadth_courses[category].append(breadth_row)
-    
-            if (st > ss and ah < ss) and category == 'AH':
+            if (catEssay == True) and breadth_row['ESSAYCREDIT'] == 'Y' :
                 breadth_courses[category].append(breadth_row)
-
-            if (st < ss and st < ah) and category == 'ST':
+            if(catA != True and catB != True and catC != True and catEssay != True) :
                 breadth_courses[category].append(breadth_row)
+            
             
         breadth_row = ibm_db.fetch_assoc(breadth_stmt)
 
@@ -185,7 +118,7 @@ def check_prerequisites(course_id, student_id, db_conn):
         
         # Check if the student has completed this prerequisite
         completion_query = f"SELECT * FROM STUCENTR.PrevEnrollment WHERE StudentID = '{student_id}' AND CourseID = '{prerequisite_course_id}'"
-        completion_query2 = "SELECT * FROM STUCENTR.Enrollment WHERE StudentID = '{student_id}' AND CourseID = '{prerequisite_course_id}'"
+        completion_query2 = f"SELECT * FROM STUCENTR.Enrollment WHERE StudentID = '{student_id}' AND CourseID = '{prerequisite_course_id}'"
         completion_stmt = ibm_db.exec_immediate(db_conn, completion_query)
         completion_stmt2 = ibm_db.exec_immediate(db_conn, completion_query2)
         
@@ -204,7 +137,7 @@ def find_course_times(course_id, db_conn):
     lab_times = []
 
     # SQL query to find lecture times for the course
-    lecture_query = f"SELECT STARTTIME, ENDTIME, WEEKDAY, STARTDATE, ENDDATE FROM STUCENTR.Lecture WHERE COURSEID = '{course_id}'"
+    lecture_query = f"SELECT STARTTIME, ENDTIME, WEEKDAY, STARTDATE, ENDDATE, ROOMID FROM STUCENTR.Lecture WHERE COURSEID = '{course_id}'"
     lecture_stmt = ibm_db.exec_immediate(db_conn, lecture_query)
     
     lecture_row = ibm_db.fetch_assoc(lecture_stmt)
@@ -217,11 +150,12 @@ def find_course_times(course_id, db_conn):
             'ENDTIME': lecture_row['ENDTIME'],
             'WEEKDAY': lecture_row['WEEKDAY'],
             'STARTDATE': lecture_row['STARTDATE'],
-            'ENDDATE': lecture_row['ENDDATE']
+            'ENDDATE': lecture_row['ENDDATE'],
+            'ROOMID': lecture_row['ROOMID']
         })
 
     # SQL query to find lab times for the course
-    lab_query = f"SELECT STARTTIME, ENDTIME, WEEKDAY, STARTDATE, ENDDATE FROM STUCENTR.Lab WHERE COURSEID = '{course_id}'"
+    lab_query = f"SELECT STARTTIME, ENDTIME, WEEKDAY, STARTDATE, ENDDATE, ROOMID FROM STUCENTR.Lab WHERE COURSEID = '{course_id}'"
     lab_stmt = ibm_db.exec_immediate(db_conn, lab_query)
     
     while True:
@@ -233,7 +167,8 @@ def find_course_times(course_id, db_conn):
             'ENDTIME': lab_row['ENDTIME'],
             'WEEKDAY': lab_row['WEEKDAY'],
             'STARTDATE': lab_row['STARTDATE'], 
-            'ENDDATE': lab_row['ENDDATE']
+            'ENDDATE': lab_row['ENDDATE'],
+            'ROOMID': lab_row['ROOMID']
         })
 
     return lecture_times, lab_times
@@ -281,6 +216,7 @@ def has_taken_course(student_id, course_id, db_conn):
         return True
     else:
         return False
+
     
 def add_course_to_schedule(course, schedule):
     # Check for conflicts with lecture time
@@ -294,17 +230,17 @@ def add_course_to_schedule(course, schedule):
         return False  # Indicates the course was not added due to conflict
 
     # If no conflicts, add lecture and lab to schedule
-    schedule.append({'CourseID': course['COURSEID'], 'Type': 'Lecture', **course['LectureTime']})
-    schedule.append({'CourseID': course['COURSEID'], 'Type': 'Lab', **course['LabTime']})
+    schedule.append({'CourseID': course['COURSEID'], 'CourseName': course['COURSENAME'], 'Location': course['ROOMID'], 'Type': 'Lecture', **course['LectureTime']})
+    schedule.append({'CourseID': course['COURSEID'], 'CourseName': course['COURSENAME'], 'Location': course['ROOMID'], 'Type': 'Lab', **course['LabTime']})
 
     return True  # Indicates the course was successfully added
 
-def schedule_remaining_courses(db_conn, student_id, scheduled_courses):
+def schedule_remaining_courses(db_conn, student_id, scheduled_courses, catA, catB, catC, catEssay):
     # Assume scheduled_courses is updated with program requirements
     num_program_courses = len(scheduled_courses)
     slots_left = 5 - num_program_courses  # Assuming a total of 5 courses needed
 
-    essay_courses, breadth_courses = fetch_requirement_courses(db_conn, student_id, scheduled_courses)
+    essay_courses, breadth_courses = fetch_requirement_courses(db_conn, student_id, scheduled_courses, catA, catB, catC, catEssay)
 
     # Schedule essay courses if needed
     for _ in range(min(4, slots_left)):  # Assuming 4 essay courses are needed
@@ -326,7 +262,7 @@ def schedule_remaining_courses(db_conn, student_id, scheduled_courses):
     # ensuring no time conflicts and meeting any remaining graduation requirements.
 
 
-def generate_schedule(student_id):
+def generate_schedule(student_id, catA, catB, catC, catEssay, progAmt):
     db_conn = connect_to_db(dsn)
     if not db_conn:
         return
@@ -336,7 +272,7 @@ def generate_schedule(student_id):
         return
 
     required_courses = fetch_program_requirements(program_id, db_conn)
-    max_required_courses = random.choice([3, 4])
+    
     
     potential_courses = []
     
@@ -346,7 +282,7 @@ def generate_schedule(student_id):
 
     # Schedule required program courses
     for course_id in required_courses:
-        if num_courses_scheduled >= max_required_courses:
+        if num_courses_scheduled >= progAmt:
             # If 4 courses have already been scheduled, break out of the loop
             break
 
@@ -355,9 +291,11 @@ def generate_schedule(student_id):
 
         if not check_prerequisites(course_id, student_id, db_conn):
             continue
+        
+        
 
         lecture_times, lab_times = find_course_times(course_id, db_conn)
-
+        
         for lecture_time, lab_time in zip(lecture_times, lab_times):
             if not check_time_conflicts(lecture_time, potential_courses) and not check_time_conflicts(lab_time, potential_courses):
                 potential_courses.append({'COURSEID': course_id, 'Type': 'Lecture', **lecture_time})
@@ -366,9 +304,8 @@ def generate_schedule(student_id):
     courseids_selected = []
     scheduled_courses = []
     
-    num_required = random.choice([3, 4])
     counter = 0
-    while len(scheduled_courses) < num_required*2 and potential_courses:
+    while len(scheduled_courses) < progAmt*2 and potential_courses:
         # Select a course
         chosen_course = random.choice([course for course in potential_courses if course['Type'] == 'Lecture' and course['COURSEID'] not in courseids_selected])
 
@@ -388,7 +325,7 @@ def generate_schedule(student_id):
         counter += 1 
         
     if num_courses_scheduled < 5:
-        essay_courses, breadth_courses = fetch_requirement_courses(db_conn, student_id, scheduled_courses)
+        essay_courses, breadth_courses = fetch_requirement_courses(db_conn, student_id, scheduled_courses, catA, catB, catC, catEssay)
         
         # Combine essay and breadth courses into a single list for random selection
         combined_courses = essay_courses + [course for sublist in breadth_courses.values() for course in sublist]
@@ -397,8 +334,11 @@ def generate_schedule(student_id):
         random.shuffle(combined_courses)
         
         while num_courses_scheduled < 5 and combined_courses:
+            
             # Select a course from the combined list
             chosen_course = combined_courses.pop()
+            if has_taken_course(student_id, chosen_course['COURSEID'], db_conn):
+                continue
             # Check for time conflicts with already scheduled courses
             if not check_time_conflicts(chosen_course, scheduled_courses):
                 # Add the chosen course to the schedule
@@ -418,12 +358,13 @@ def generate_schedule(student_id):
         # Prepare the course data dictionary
         course_data = {
             "COURSEID": course['COURSEID'],
-            "TYPE": course.get('Type', ''),  # Use .get() to handle missing 'Type' key gracefully
+            "TYPE": course.get('Type', 'Lecture'),  # Use .get() to handle missing 'Type' key gracefully
             "STARTTIME": course['STARTTIME'].strftime('%H:%M:%S') if hasattr(course['STARTTIME'], 'strftime') else course['STARTTIME'],
             "ENDTIME": course['ENDTIME'].strftime('%H:%M:%S') if hasattr(course['ENDTIME'], 'strftime') else course['ENDTIME'],
             "WEEKDAY": course['WEEKDAY'],
             "STARTDATE": course['STARTDATE'].isoformat() if hasattr(course['STARTDATE'], 'isoformat') else course['STARTDATE'],
-            "ENDDATE": course['ENDDATE'].isoformat() if hasattr(course['ENDDATE'], 'isoformat') else course['ENDDATE']
+            "ENDDATE": course['ENDDATE'].isoformat() if hasattr(course['ENDDATE'], 'isoformat') else course['ENDDATE'],
+            "LOCATION": course['ROOMID']
         }
         
         all_courses_data.append(course_data)
@@ -435,17 +376,34 @@ def generate_schedule(student_id):
     
     ibm_db.close(db_conn)
         
-def main(studentID):
-    generate_schedule(studentID)
+def main(studentID, catA, catB, catC, catEssay, progAmt):
+    generate_schedule(studentID, catA, catB, catC, catEssay, progAmt)
 
 
-#generate_schedule('823321975')
+generate_schedule('823321975', False, False, False, True, 4)
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        studentID = sys.argv[1]
-        main(studentID)
-    else:
-        print("No student ID provided")
-        sys.exit(1)
+# if __name__ == "__main__":
+#     if len(sys.argv) > 1:
+#         studentID = sys.argv[1]
+#         if(sys.argv[2] == 'true'):
+#             catA = True
+#         else:
+#             catA = False
+#         if(sys.argv[3] == 'true'):
+#             catB = True
+#         else:
+#             catB = False
+#         if(sys.argv[4] == 'true'):
+#             catC = True
+#         else:
+#             catC = False
+#         if(sys.argv[5] == 'true'):
+#             catEssay = True
+#         else:
+#             catEssay = False
+#         3
+#         progAmt = int(sys.argv[6])
+#         main(studentID, catA, catB, catC, catEssay, progAmt)
+#     else:
+#         sys.exit(1)
 

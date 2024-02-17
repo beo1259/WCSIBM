@@ -84,7 +84,15 @@ app.get('/course-category', (req, res) => {
 
 app.post('/generate-schedule', (req, res) => {
   const { studentID } = req.body;
-  const script = spawn('python', ['./schedule-generation-alg.py', studentID]);
+  const { catA } = req.body;
+  const { catB } = req.body;
+  const { catC } = req.body;
+  const { catEssay } = req.body;
+  const { progAmt } = req.body;
+  
+  
+
+  const script = spawn('python', ['./schedule-generation-alg.py', studentID, catA, catB, catC, catEssay, progAmt]);
   let outputData = '';
 
   // Listen for data from the script
@@ -99,7 +107,7 @@ app.post('/generate-schedule', (req, res) => {
 
   script.on('error', (error) => {
     console.error('Error executing script:', error);
-    res.status(500).json({ error: 'An error occurred during schedule generation' });
+    res.status(500).json(outputData);
   });
 });
 
