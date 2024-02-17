@@ -157,6 +157,11 @@ const MyCalendarPage = () => {
       return unique;
     }, []);
 
+    uniqueEventsForWeek.sort((a, b) => {
+      return moment(a.start).diff(moment(b.start));
+    });
+  
+
   // Render the unique course list
   const courseList = uniqueEventsForWeek.map((event, index) => (
     <div key={index} className="mb-2">

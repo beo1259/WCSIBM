@@ -380,30 +380,30 @@ def main(studentID, catA, catB, catC, catEssay, progAmt):
     generate_schedule(studentID, catA, catB, catC, catEssay, progAmt)
 
 
-generate_schedule('823321975', False, False, False, True, 4)
+#generate_schedule('823321975', False, False, False, True, 4)
 
-# if __name__ == "__main__":
-#     if len(sys.argv) > 1:
-#         studentID = sys.argv[1]
-#         if(sys.argv[2] == 'true'):
-#             catA = True
-#         else:
-#             catA = False
-#         if(sys.argv[3] == 'true'):
-#             catB = True
-#         else:
-#             catB = False
-#         if(sys.argv[4] == 'true'):
-#             catC = True
-#         else:
-#             catC = False
-#         if(sys.argv[5] == 'true'):
-#             catEssay = True
-#         else:
-#             catEssay = False
-#         3
-#         progAmt = int(sys.argv[6])
-#         main(studentID, catA, catB, catC, catEssay, progAmt)
-#     else:
-#         sys.exit(1)
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        studentID = sys.argv[1]
+        if(sys.argv[2] == 'true'):
+            catA = True
+        else:
+            catA = False
+        if(sys.argv[3] == 'true'):
+            catB = True
+        else:
+            catB = False
+        if(sys.argv[4] == 'true'):
+            catC = True
+        else:
+            catC = False
+        if(sys.argv[5] == 'true'):
+            catEssay = True
+        else:
+            catEssay = False
+        3
+        progAmt = int(sys.argv[6])
+        main(studentID, catA, catB, catC, catEssay, progAmt)
+    else:
+        sys.exit(1)
 
