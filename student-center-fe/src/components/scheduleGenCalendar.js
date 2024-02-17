@@ -188,19 +188,27 @@ const ScheduleGenerationCalendar = () => {
         return moment(date).isBetween(startOfWeek, endOfWeek);
     };
 
-    const courseList = lectures
-        .filter(lecture => isCurrentWeek(lecture.start))
-        .map((lecture, index) => (
-            <div key={index} className="mb-2">
-                <div className='font-bold'>{lecture.title}</div>
-                <div>{moment(lecture.start).format('dddd')}</div>
-                <div>Start time: {moment(lecture.start).format('h:mma')}</div>
-                <div>End time: {moment(lecture.end).format('h:mma')}</div>
-                <hr/>
-            </div>
-        ));
+    const uniqueEventsForCurrentWeek = lectures
+        .filter(event => isCurrentWeek(event.start)) // Filter events for the current week
+        .sort((a, b) => new Date(a.start) - new Date(b.start)) // Sort them by start time
+        .reduce((acc, current) => {
+            const x = acc.find(item => item.title === current.title);
+            if (!x) {
+                return acc.concat([current]);
+            } else {
+                return acc;
+            }
+        }, []);
 
-    const uniqueCourses = Array.from(new Map(courseList.map(item => [item.props.children[0], item])).values());
+    const courseListItems = uniqueEventsForCurrentWeek.map((event, index) => (
+        <div key={index} className="mb-2">
+            <div className='font-bold'>{event.title}</div>
+            <div>{moment(event.start).format('dddd, MMMM Do YYYY')}</div>
+            <div>Start time: {moment(event.start).format('h:mma')}</div>
+            <div>End time: {moment(event.end).format('h:mma')}</div>
+            <hr/>
+        </div>
+    ));
 
     return (
         <div className='h-full w-full relative'>
@@ -260,7 +268,7 @@ const ScheduleGenerationCalendar = () => {
             </div>
             <div className="w-full rounded-lg dropshadow-md mt-3 bg-gray-100 p-4 overflow-y-auto h-auto" >
                 <h2 className='text-lg font-bold mb-4'>Enrollment Summary</h2>
-                {uniqueCourses.length > 0 ? uniqueCourses : <p>Generate some courses...</p>}
+                {courseListItems.length > 0 ? courseListItems : <p>No courses scheduled this week.</p>}
             </div>
         </div>
 
