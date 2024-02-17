@@ -5,9 +5,36 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const localizer = momentLocalizer(moment);
 
+function randomIntFromInterval(min, max) { // min and max included 
+    return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
 const ScheduleGenerationCalendar = () => {
     const [lectures, setLectures] = useState([]);
     const [isLoading, setIsLoading] = useState(false); // New loading state
+    // for checkboxes
+    const [catACheck, setCatACheck] = useState(false);
+    const [catBCheck, setCatBCheck] = useState(false);
+    const [catCCheck, setCatCCheck] = useState(false);
+    const [essayCheck, setEssayCheck] = useState(false);
+    const [progCheck, setProgCheck] = useState(3);
+
+    const handProgChange = (event) => {
+        setProgCheck(event.target.value)
+
+    }
+    const handleChangeA = (event) => {
+        setCatACheck(event.target.checked);
+    }
+    const handleChangeB = (event) => {
+        setCatBCheck(event.target.checked);
+    }
+    const handleChangeC = (event) => {
+        setCatCCheck(event.target.checked);
+    }
+    const handleChangeEssay = (event) => {
+        setEssayCheck(event.target.checked);
+    }
 
     function calculateCourseTotals(courses) {
         // Initialize counts
@@ -23,7 +50,7 @@ const ScheduleGenerationCalendar = () => {
             if (course.BREADTH === 'ST') breadthSTCount++;
             if (course.ESSAYCREDIT === 'Y') essayCreditCount++;
         });
-        
+
         let finalAH = 2 - breadthAHCount;
         let finalSS = 2 - breadthSSCount;
         let finalST = 2 - breadthSTCount;
@@ -38,7 +65,7 @@ const ScheduleGenerationCalendar = () => {
         if (finalST < 0) {
             finalST = 0
         }
-        if (finalEssay < 0){
+        if (finalEssay < 0) {
             finalEssay = 0
         }
 
@@ -55,6 +82,7 @@ const ScheduleGenerationCalendar = () => {
     });
 
     useEffect(() => {
+        
         let stuCalendarID = sessionStorage.getItem('studentId');
         if (stuCalendarID) {
             fetchStudentCourses(stuCalendarID);
@@ -63,6 +91,7 @@ const ScheduleGenerationCalendar = () => {
 
     async function fetchStudentCourses(stuCalendarID) {
         try {
+
             const url = `http://localhost:3005/course-category?studentID=${stuCalendarID}`;
             const response = await fetch(url, {
                 method: 'GET',
@@ -91,16 +120,21 @@ const ScheduleGenerationCalendar = () => {
 
 
     const scheduleInfo = async () => {
+        let finalProgCheck = null;
+        finalProgCheck = progCheck || 3;
         setIsLoading(true); // Start loading
         setLectures([]); // Clear the calendar while loading
         let stuCalendarID = sessionStorage.getItem('studentId');
+        console.log(progCheck);
         try {
+
+            console.log('A: ', catACheck, 'B: ', catBCheck, 'C: ', catCCheck, 'Essay: ', essayCheck)
             const response = await fetch('http://localhost:3005/generate-schedule', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ studentID: stuCalendarID }),
+                body: JSON.stringify({ studentID: stuCalendarID, catA: catACheck, catB: catBCheck, catC: catCCheck, catEssay: essayCheck, progAmt: finalProgCheck }),
             });
 
             if (!response.ok) {
@@ -123,7 +157,7 @@ const ScheduleGenerationCalendar = () => {
                             second: lectureStartTime.get('second'),
                         });
                         lectureEvents.push({
-                            title: lecture.COURSEID,
+                            title: `${lecture.COURSEID} - ${lecture.TYPE}: ${lecture.LOCATION}`,
                             start: lectureStartDateTime.toDate(),
                             end: moment(lectureStartDateTime).add(lectureEndTime.diff(lectureStartTime, 'hours'), 'hour').toDate(),
                             allDay: false,
@@ -147,6 +181,26 @@ const ScheduleGenerationCalendar = () => {
 
     const maxTime = new Date();
     maxTime.setHours(22, 0, 0);
+
+    const isCurrentWeek = (date) => {
+        const startOfWeek = moment().startOf('week');
+        const endOfWeek = moment().endOf('week');
+        return moment(date).isBetween(startOfWeek, endOfWeek);
+    };
+
+    const courseList = lectures
+        .filter(lecture => isCurrentWeek(lecture.start))
+        .map((lecture, index) => (
+            <div key={index} className="mb-2">
+                <div className='font-bold'>{lecture.title}</div>
+                <div>{moment(lecture.start).format('dddd')}</div>
+                <div>Start time: {moment(lecture.start).format('h:mma')}</div>
+                <div>End time: {moment(lecture.end).format('h:mma')}</div>
+                <hr/>
+            </div>
+        ));
+
+    const uniqueCourses = Array.from(new Map(courseList.map(item => [item.props.children[0], item])).values());
 
     return (
         <div className='h-full w-full relative'>
@@ -176,16 +230,38 @@ const ScheduleGenerationCalendar = () => {
                 })}
             />
             <div className="mt-6">
-            <p>You still need <span className="font-bold">{courseTotals.finalSS} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category A 'Social Science'</a></span> course(s) to graduate</p>
+                <label className='font-bold' id="cata">How many program courses would you like to take? <span className='font-normal '>Default 3. <span className='font-normal underline'>Select (1-5)</span> </span></label>
+                <input className='border-2 border-purple-300 rounded-md w-9' list="progReqs" onChange={handProgChange} />
+                <datalist id="progReqs">
+                    <option value="1" />
+                    <option value="2" />
+                    <option value="3" />
+                    <option value="4" />
+                    <option value="5" />
+                </datalist>
 
-                <p>You still need <span className="font-bold">{courseTotals.finalAH} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category B 'Arts and Humanities'</a></span>course(s) to graduate</p>
 
-                <p>You still need <span className="font-bold">{courseTotals.finalST} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category C 'STEM'</a></span>  course(s) to graduate</p>
+                <p>You still need <span className="font-bold">{courseTotals.finalSS} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category A 'Social Science'</a></span> course(s) to graduate.
+                    <label className='font-bold' id="cata"> Prioritize this?</label> <input type="checkbox" onChange={handleChangeA} />
+                </p>
 
-                <p>You still need <span className="font-bold">{courseTotals.finalEssay} </span><span className="underline"><a href="https://www.uwo.ca/univsec/pdf/academic_policies/registration_progression_grad/coursenumbering.pdf" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Essay</a></span> course(s) to graduate</p>
+                <p>You still need <span className="font-bold">{courseTotals.finalAH} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category B 'Arts and Humanities'</a></span>course(s) to graduate.
+                    <label className='font-bold' id="catb"> Prioritize this?</label> <input type="checkbox" onChange={handleChangeB} />
+                </p>
 
+                <p>You still need <span className="font-bold">{courseTotals.finalST} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category C 'STEM'</a></span>  course(s) to graduate.
+                    <label className='font-bold' id="catc"> Prioritize this?</label> <input type="checkbox" onChange={handleChangeC} />
+                </p>
+
+                <p>You still need <span className="font-bold">{courseTotals.finalEssay} </span><span className="underline"><a href="https://www.uwo.ca/univsec/pdf/academic_policies/registration_progression_grad/coursenumbering.pdf" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Essay</a></span> course(s) to graduate.
+                    <label className='font-bold' id="catb"> Prioritize this?</label> <input type="checkbox" onChange={handleChangeEssay} />
+                </p>
+                
             </div>
-
+            <div className="w-full rounded-lg dropshadow-md mt-3 bg-gray-100 p-4 overflow-y-auto h-auto" >
+                <h2 className='text-lg font-bold mb-4'>Enrollment Summary</h2>
+                {uniqueCourses.length > 0 ? uniqueCourses : <p>Generate some courses...</p>}
+            </div>
         </div>
 
     );

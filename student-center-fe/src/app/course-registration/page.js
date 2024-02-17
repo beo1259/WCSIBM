@@ -12,7 +12,7 @@ const CourseRegistration = () => {
     const router = useRouter();
 
     const [activeMenu, setActiveMenu] = useState('schedule');
-    
+
     useEffect(() => {
         const menuFromSessionStorage = sessionStorage.getItem("searching");
         console.log("first checkpoint")
@@ -20,16 +20,16 @@ const CourseRegistration = () => {
         if (menuFromSessionStorage) {
             console.log("we cooking")
             console.log(menuFromSessionStorage)
-          setActiveMenu(menuFromSessionStorage);
+            setActiveMenu(menuFromSessionStorage);
         }
-      }, []);
+    }, []);
 
 
     const [courses, setCourses] = useState([]);
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
-    
+
     //useState for course information
     const [isInfo, setInfo] = useState(false);
     const handleInfo = () => {
@@ -73,7 +73,7 @@ const CourseRegistration = () => {
                     console.error('Error fetching enrolled courses:', error);
                 });
         }
-        
+
         const fetchStudentLectures = async () => {
             try {
                 const response = await fetch(`http://localhost:3005/api/student-lectures?studentId=${stuID}`);
@@ -115,13 +115,13 @@ const CourseRegistration = () => {
             </div>
             <div className="flex flex-row min-h-screen bg-gradient-to-r from-purple-800 to-purple-600 text-white">
                 {/* Fixed Sidebar */}
-                <aside className="fixed top-16 left-0 w-68 p-6 space-y-6 bg-purple-900 h-screen overflow-auto">
-                    <h2 className="text-2xl font-bold">Course Actions</h2>
+                <aside className="fixed top-16 left-0 w-68 p-6 space-y-6 bg-gradient-to-r from-purple-800 to-purple-600  h-screen overflow-auto">
+                    <h2 className="text-3xl bottom-40 font-bold">Course Actions</h2>
                     {Object.entries(menuItems).map(([key, title]) => (
                         <div
                             key={key}
                             onClick={() => setActiveMenu(key)}
-                            className={`p-4 text-lg font-semibold rounded-xl cursor-pointer hover:bg-purple-700 transition ease ${activeMenu === key ? 'bg-purple-700' : ''
+                            className={`p-2 text-lg font-semibold rounded-xl cursor-pointer hover:bg-purple-800 transition ease ${activeMenu === key ? 'bg-purple-800' : ''
                                 }`}
                         >
                             {title}
@@ -170,15 +170,15 @@ const CourseRegistration = () => {
                             <div>
                                 <h2 className="text-2xl font-semibold mb-2">Drop Course</h2>
                                 <div className="space-y-2">
-                                {enrolledCourses.map((course) => (
-                                    <button
-                                        key={course.COURSEID}
-                                        onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
-                                        className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
-                                    >
-                                        {course.COURSEID}
-                                    </button>
-                                ))}
+                                    {enrolledCourses.map((course) => (
+                                        <button
+                                            key={course.COURSEID}
+                                            onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
+                                            className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
+                                        >
+                                            {course.COURSEID}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         )}
@@ -186,26 +186,27 @@ const CourseRegistration = () => {
                             <div>
                                 <h2 className="text-2xl font-semibold mb-2">Swap Courses</h2>
                                 <div className="space-y-2">
-                                {enrolledCourses.map((course) => (
-                                    <button
-                                        key={course.COURSEID}
-                                        onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
-                                        className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
-                                    >
-                                        {course.COURSEID}
-                                    </button>
-                                ))}
+                                    {enrolledCourses.map((course) => (
+                                        <button
+                                            key={course.COURSEID}
+                                            onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
+                                            className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
+                                        >
+                                            {course.COURSEID}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         )}
                         {activeMenu === 'scheduleGeneration' && (
                             <div>
-                                <ScheduleGenerationCalendar/>
+                                <ScheduleGenerationCalendar />
                             </div>
                         )}
                     </div>
                     </div>
                 </main>
+
             </div>
         </>
     );
