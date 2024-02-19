@@ -2,17 +2,33 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/router';
 import Header from '@/components/header';
 import MyCalendarPage from '@/components/calendar';
+import ScheduleGenerationCalendar from '@/components/scheduleGenCalendar';
 
 const CourseRegistration = () => {
-    const [activeMenu, setActiveMenu] = useState('schedule');
     const [date, setDate] = useState(new Date());
     const router = useRouter();
+
+    const [activeMenu, setActiveMenu] = useState('schedule');
+
+    useEffect(() => {
+        const menuFromSessionStorage = sessionStorage.getItem("searching");
+        console.log("first checkpoint")
+        console.log(sessionStorage.getItem("searching"))
+        if (menuFromSessionStorage) {
+            console.log("we cooking")
+            console.log(menuFromSessionStorage)
+            setActiveMenu(menuFromSessionStorage);
+        }
+    }, []);
+
 
     const [courses, setCourses] = useState([]);
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+
 
     //useState for course information
     const [isInfo, setInfo] = useState(false);
@@ -83,6 +99,7 @@ const CourseRegistration = () => {
         addCourse: 'Add a Course',
         dropCourse: 'Drop a Course',
         swapCourses: 'Swap Courses',
+        scheduleGeneration: 'Generate Schedule 🪄'
     };
 
     const onChange = (newDate) => {
@@ -98,13 +115,13 @@ const CourseRegistration = () => {
             </div>
             <div className="flex flex-row min-h-screen bg-gradient-to-r from-purple-800 to-purple-600 text-white">
                 {/* Fixed Sidebar */}
-                <aside className="fixed top-16 left-0 w-54 p-6 space-y-6 bg-purple-900 h-screen overflow-auto">
-                    <h2 className="text-2xl font-bold">Course Actions</h2>
+                <aside className="fixed top-16 left-0 w-68 p-6 space-y-6 bg-gradient-to-r from-purple-800 to-purple-600  h-screen overflow-auto">
+                    <h2 className="text-3xl bottom-40 font-bold">Course Actions</h2>
                     {Object.entries(menuItems).map(([key, title]) => (
                         <div
                             key={key}
                             onClick={() => setActiveMenu(key)}
-                            className={`p-4 text-lg font-semibold rounded-md cursor-pointer hover:bg-purple-700 ${activeMenu === key ? 'bg-purple-700' : ''
+                            className={`p-2 text-lg font-semibold rounded-xl cursor-pointer hover:bg-purple-800 transition ease ${activeMenu === key ? 'bg-purple-800' : ''
                                 }`}
                         >
                             {title}
@@ -113,7 +130,7 @@ const CourseRegistration = () => {
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 mt-10 ml-60 p-10 bg-purple-100 text-gray-800">
+                <main className="flex-1 mt-10 ml-64 p-10 bg-purple-100 text-gray-800">
                     <div className="bg-white p-6 rounded-lg shadow-lg">                        <div className="space-y-4">
                         {activeMenu === 'schedule' && (
                             <div>
@@ -134,7 +151,7 @@ const CourseRegistration = () => {
                                         <button
                                             key={course.COURSEID}
                                             onClick={handleInfo}
-                                            className="block w-full text-left p-2 bg-purple-200 rounded hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
+                                            className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
                                         >
                                             {course.COURSEID} - {course.COURSENAME}
                                         </button>
@@ -152,34 +169,44 @@ const CourseRegistration = () => {
                         {activeMenu === 'dropCourse' && (
                             <div>
                                 <h2 className="text-2xl font-semibold mb-2">Drop Course</h2>
-                                {enrolledCourses.map((course) => (
-                                    <button
-                                        key={course.COURSEID}
-                                        onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
-                                        className="block w-full text-left p-2 bg-purple-200 rounded hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
-                                    >
-                                        {course.COURSEID}
-                                    </button>
-                                ))}
+                                <div className="space-y-2">
+                                    {enrolledCourses.map((course) => (
+                                        <button
+                                            key={course.COURSEID}
+                                            onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
+                                            className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
+                                        >
+                                            {course.COURSEID}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         )}
                         {activeMenu === 'swapCourses' && (
                             <div>
                                 <h2 className="text-2xl font-semibold mb-2">Swap Courses</h2>
-                                {enrolledCourses.map((course) => (
-                                    <button
-                                        key={course.COURSEID}
-                                        onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
-                                        className="block w-full text-left p-2 bg-purple-200 rounded hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
-                                    >
-                                        {course.COURSEID}
-                                    </button>
-                                ))}
+                                <div className="space-y-2">
+                                    {enrolledCourses.map((course) => (
+                                        <button
+                                            key={course.COURSEID}
+                                            onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
+                                            className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
+                                        >
+                                            {course.COURSEID}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {activeMenu === 'scheduleGeneration' && (
+                            <div>
+                                <ScheduleGenerationCalendar />
                             </div>
                         )}
                     </div>
                     </div>
                 </main>
+
             </div>
         </>
     );
