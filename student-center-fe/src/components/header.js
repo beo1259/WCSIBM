@@ -14,25 +14,16 @@ const Header = () => {
     const [showAutoComplete, setShowAutoComplete] = useState(false);
 
 
-<<<<<<< HEAD
-    const autoCompleteOptions = ['Your Schedule', 'Add Course', 'Drop Course', 'Swap Course', 'Generate Schedule'];
-=======
     const autoCompleteOptions = ['Your Schedule', 'Add Course', 'Drop Course', 'Swap Course', 'Generate Schedule', 'Program Status', 'Grades'];
->>>>>>> a23c0170cb278db54328711b84d238569d5d9752
 
     const searchRoutes = {
         'Your Schedule': ['/course-registration','schedule'],
         'Add Course': ['/course-registration','addCourse'],
         'Drop Course': ['/course-registration','dropCourse'],
         'Swap Course': ['/course-registration','swapCourses'],
-<<<<<<< HEAD
-        'Generate Schedule': ['/course-registration','generateSchedule']
-
-=======
         'Generate Schedule': ['/course-registration', 'scheduleGeneration'],
         'Program Status': ['/program-status'],
         'Grade': ['/grades']
->>>>>>> a23c0170cb278db54328711b84d238569d5d9752
     };
 
     const filteredOptions = autoCompleteOptions.filter((option) =>
