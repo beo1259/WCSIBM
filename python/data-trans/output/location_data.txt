@@ -1,0 +1,7 @@
+NATSCI    Natural Sciences Center
+NCB       North Campus Building
+MC        Middlesex College
+SSC       Social Science Center
+UCC       University Community Centre
+AHB       Arts and Humanities Building
+UC        University College
