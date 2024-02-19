@@ -1,0 +1,15 @@
+1   Computer Science
+2   Software Engineering
+3   Pyschology
+4   Kinesiology
+5   BMOS
+6   Philosophy
+7   Social Science
+8   Music
+9   Ivey AEO
+10  Law
+11  Mathematics
+12  English
+13  Film
+14  Visual Art
+15  History
