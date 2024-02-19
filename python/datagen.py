@@ -44,7 +44,7 @@ def check_length(field_name, data):
 #     first_name = fake.first_name()
 #     last_name = fake.last_name()
 #     random_number = random.randint(10, 99)  # Random two-digit number
-#     email = f"{first_name[0].lower()}{last_name.lower()}{random_number}@uwo.ca"
+#     email = f"{first_name[0].lower()}{last_name.lower()}{random_ncd umber}@uwo.ca"
     
 #     password = fake.password()
 #     phone = fake.phone_number()
