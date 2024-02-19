@@ -129,41 +129,75 @@ app.get('/api/student-lectures', (req, res) => {
     });
   });
   
-  app.get('/api/student-program', (req, res) => {
-    const studentId = req.query.studentId;
-  
-    if (!studentId) {
-      return res.status(400).json({ error: 'Student ID is required' });
+//Program status information for a student
+app.get('/api/student-program', (req, res) => {
+  const studentId = req.query.studentId;
+
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+
+  ibmdb.open(connStr, (err, conn) => {
+    if (err) {
+      console.error('Connection error:', err);
+      return res.status(500).json({ error: 'Unable to connect to the database' });
     }
-  
-    ibmdb.open(connStr, (err, conn) => {
+
+    // Use the provided SQL command and modify it to use the parameterized studentId
+    const query = `
+      SELECT S.YEAR, P.PROGRAMNAME
+      FROM STUCENTR.PROGRAM P
+      INNER JOIN STUCENTR.PROGRAMENROLLMENT PE ON PE.PROGRAMID = P.PROGRAMID
+      INNER JOIN STUCENTR.STUDENT S ON S.STUDENTID = PE.STUDENTID
+      WHERE S.STUDENTID = '${studentId}';
+    `;
+
+    conn.query(query, [studentId], (err, data) => {
       if (err) {
-        console.error('Connection error:', err);
-        return res.status(500).json({ error: 'Unable to connect to the database' });
-      }
-  
-      // Use the provided SQL command and modify it to use the parameterized studentId
-      const query = `
-        SELECT S.YEAR, P.PROGRAMNAME
-        FROM STUCENTR.PROGRAM P
-        INNER JOIN STUCENTR.PROGRAMENROLLMENT PE ON PE.PROGRAMID = P.PROGRAMID
-        INNER JOIN STUCENTR.STUDENT S ON S.STUDENTID = PE.STUDENTID
-        WHERE S.STUDENTID = '${studentId}';
-      `;
-  
-      conn.query(query, [studentId], (err, data) => {
-        if (err) {
-          console.error('Query error:', err);
-          conn.close();
-          return res.status(500).json({ error: 'Failed to retrieve program information' });
-        }
-        // Process the data to fit the schedule format if needed, or send as is
-        res.json(data);
+        console.error('Query error:', err);
         conn.close();
-      });
+        return res.status(500).json({ error: 'Failed to retrieve program information' });
+      }
+      res.json(data);
+      conn.close();
     });
   });
+});
 
+//Gets grades for a specific student
+app.get('/api/student-grades', (req, res) => {
+  const studentId = req.query.studentId;
+
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+
+  ibmdb.open(connStr, (err, conn) => {
+    if (err) {
+      console.error('Connection error:', err);
+      return res.status(500).json({ error: 'Unable to connect to the database' });
+    }
+    
+    const query = `
+      SELECT G.GRADE, C.COURSENAME, C.COURSEID
+      FROM STUCENTR.GRADE G
+      INNER JOIN STUCENTR.PREVENROLLMENT PE ON PE.PREVENROLLMENTID = G.PREVENROLLMENTID
+      INNER JOIN STUCENTR.STUDENT S ON S.STUDENTID = PE.STUDENTID
+      INNER JOIN STUCENTR.COURSE C ON C.COURSEID = PE.COURSEID
+      WHERE S.STUDENTID = '${studentId}';
+    `;
+
+    conn.query(query, [studentId], (err, data) => {
+      if (err) {
+        console.error('Query error:', err);
+        conn.close();
+        return res.status(500).json({ error: 'Failed to retrieve program information' });
+      }
+      res.json(data);
+      conn.close();
+    });
+  });
+});
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
