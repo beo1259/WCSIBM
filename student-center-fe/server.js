@@ -286,8 +286,8 @@ app.get('/api/student-program', (req, res) => {
 
 //Gets grades for a specific student
 app.get('/api/student-grades', (req, res) => {
-  const studentId = req.query.studentId;
-
+  const studentId = req.query.studentID;
+  console.log("hi")
   if (!studentId) {
     return res.status(400).json({ error: 'Student ID is required' });
   }
