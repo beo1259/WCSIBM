@@ -284,6 +284,40 @@ app.get('/api/student-program', (req, res) => {
   });
 });
 
+//Gets grades for a specific student
+app.get('/api/student-grades', (req, res) => {
+  const studentId = req.query.studentId;
+
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+
+  ibmdb.open(connStr, (err, conn) => {
+    if (err) {
+      console.error('Connection error:', err);
+      return res.status(500).json({ error: 'Unable to connect to the database' });
+    }
+    
+    const query = `
+      SELECT G.GRADE, C.COURSENAME, C.COURSEID
+      FROM STUCENTR.GRADE G
+      INNER JOIN STUCENTR.PREVENROLLMENT PE ON PE.PREVENROLLMENTID = G.PREVENROLLMENTID
+      INNER JOIN STUCENTR.STUDENT S ON S.STUDENTID = PE.STUDENTID
+      INNER JOIN STUCENTR.COURSE C ON C.COURSEID = PE.COURSEID
+      WHERE S.STUDENTID = '${studentId}';
+    `;
+
+    conn.query(query, [studentId], (err, data) => {
+      if (err) {
+        console.error('Query error:', err);
+        conn.close();
+        return res.status(500).json({ error: 'Failed to retrieve program information' });
+      }
+      res.json(data);
+      conn.close();
+    });
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
