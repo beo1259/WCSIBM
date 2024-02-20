@@ -11,6 +11,10 @@ const CourseRegistration = () => {
     const [date, setDate] = useState(new Date());
     const router = useRouter();
 
+    //Temp to display for confirmation message
+    const [tempStoreLecture, setTempStoreLecture] = useState([]);
+    const [tempStoreLab, setTempStoreLab] = useState([]);
+
     const [activeMenu, setActiveMenu] = useState('schedule');
 
     useEffect(() => {
@@ -25,14 +29,15 @@ const CourseRegistration = () => {
     }, []);
 
 
-    const [courses, setCourses] = useState([]);
+    let [courses, setCourses] = useState([]);
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
 
     //useState for course information
     const [isInfo, setInfo] = useState(false);
-    const handleInfo = () => {
+    const handleInfo = async (courseID) => {
+        courseInformation(courseID);
         setInfo(!isInfo);
     }
 
@@ -51,7 +56,7 @@ const CourseRegistration = () => {
 
     useEffect(() => {
         if (activeMenu === 'addCourse') {
-            fetch('http://localhost:3005/api/courses')
+            fetch(`http://localhost:3005/api/courses?studentID=${stuID}`)
                 .then((response) => response.json())
                 .then((data) => {
                     setCourses(data);
@@ -61,7 +66,7 @@ const CourseRegistration = () => {
                     console.error('Error fetching courses:', error);
                 });
         }
-
+        
         const menusThatRequireEnrollmentInfo = ['dropCourse', 'swapCourses'];
         if (menusThatRequireEnrollmentInfo.includes(activeMenu) && stuID) {
             fetch(`http://localhost:3005/api/student-courses?studentId=${stuID}`)
@@ -108,6 +113,25 @@ const CourseRegistration = () => {
         // Here you will eventually fetch and display the course data for the selected date
     };
 
+    //Call API to get specific course information
+    const courseInformation = async (courseID) => {
+        const response = await fetch(`http://localhost:3005/api/course-information?courseID=${courseID}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        //Separate lab and lecture data
+        let lectures = []; let labs = [];
+        for(let i=0;i<data.length;i++){
+            if(data[i].hasOwnProperty('LECTUREID'))
+                lectures.push(data[i]);
+            else
+                labs.push(data[i]);
+        }
+        setTempStoreLecture(lectures);
+        setTempStoreLab(labs);
+    }
+
     return (
         <>
             <div className="fixed top-0 left-0 w-full z-50">
@@ -150,7 +174,7 @@ const CourseRegistration = () => {
                                     {filteredCourses.map((course) => (
                                         <button
                                             key={course.COURSEID}
-                                            onClick={handleInfo}
+                                            onClick={() => handleInfo(course.COURSEID)}
                                             className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
                                         >
                                             {course.COURSEID} - {course.COURSENAME}
@@ -159,11 +183,55 @@ const CourseRegistration = () => {
                                 </div>
                             </div>
                         )}
+                        {/*Enrollment confirmation*/}
                         {activeMenu === 'addCourse' && isInfo && (
                             <div>
-                                <p className='mx-6'>hello</p>
-                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6 origin-bottom-right' onClick={handleInfo}>Back</button>
-                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 mx-6 origin-bottom-right' onClick={handleInfo}>Enroll</button>
+                                <p className='font-semibold border-b-2 border-black mb-4'>Lectures</p>
+                                <table className='w-full p-6 divide-y-2'>
+                                    <tr className='grid grid-cols-5'>
+                                        <th>SECTION</th>
+                                        <th>ROOM</th>
+                                        <th>TIME</th>
+                                        <th>START/END DATE</th>
+                                        <th>ENROLL</th>
+                                    </tr>
+                                    {tempStoreLecture.map((value, key) => {
+                                        return(
+                                            <tr className='grid grid-cols-5 text-center'>
+                                                <td key={key}>{value.LECTUREID}</td>
+                                                <td key={key}>{value.ROOMID}</td>
+                                                <td key={key}>{value.STARTTIME} - {value.ENDTIME}</td>
+                                                <td key={key}>{value.STARTDATE} - {value.ENDDATE}</td>
+                                                <input type='checkbox' className='scale-[25%]'></input>
+                                            </tr>
+                                        );
+                                    })}
+                                </table>
+                                <p className='font-semibold border-b-2 border-black mb-4'>Labs</p>
+                                <table className='w-full p-6 divide-y-2'>
+                                    <tr className='grid grid-cols-5 pt-6'>
+                                        <th>SECTION</th>
+                                        <th>ROOM</th>
+                                        <th>TIME</th>
+                                        <th>START/END DATE</th>
+                                        <th>ENROLL</th>
+                                    </tr>
+                                    {tempStoreLab.map((value, key) => {
+                                        return(
+                                            <tr className='grid grid-cols-5 text-center'>
+                                                <td key={key}>{value.LABID}</td>
+                                                <td key={key}>{value.ROOMID}</td>
+                                                <td key={key}>{value.STARTTIME} - {value.ENDTIME}</td>
+                                                <td key={key}>{value.STARTDATE} - {value.ENDDATE}</td>
+                                                <input type='checkbox' className='scale-[25%]'></input>
+                                            </tr>
+                                        );
+                                    })}
+                                </table>
+                                <div className='inline justify-between'>
+                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Back</button>
+                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Confirm</button>
+                                </div>
                             </div>
                         )}
                         {activeMenu === 'dropCourse' && (
