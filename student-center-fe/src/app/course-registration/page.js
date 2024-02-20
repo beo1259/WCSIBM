@@ -186,9 +186,8 @@ const CourseRegistration = () => {
                         {/*Enrollment confirmation*/}
                         {activeMenu === 'addCourse' && isInfo && (
                             <div>
-                                <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Back</button>
-                                <p>Lectures</p>
-                                <table className='w-full p-6'>
+                                <p className='font-semibold border-b-2 border-black mb-4'>Lectures</p>
+                                <table className='w-full p-6 divide-y-2'>
                                     <tr className='grid grid-cols-5'>
                                         <th>SECTION</th>
                                         <th>ROOM</th>
@@ -203,11 +202,13 @@ const CourseRegistration = () => {
                                                 <td key={key}>{value.ROOMID}</td>
                                                 <td key={key}>{value.STARTTIME} - {value.ENDTIME}</td>
                                                 <td key={key}>{value.STARTDATE} - {value.ENDDATE}</td>
-                                                <input type='checkbox' className=''></input>
+                                                <input type='checkbox' className='scale-[25%]'></input>
                                             </tr>
                                         );
                                     })}
-                                    <p>Labs</p>
+                                </table>
+                                <p className='font-semibold border-b-2 border-black mb-4'>Labs</p>
+                                <table className='w-full p-6 divide-y-2'>
                                     <tr className='grid grid-cols-5 pt-6'>
                                         <th>SECTION</th>
                                         <th>ROOM</th>
@@ -222,11 +223,15 @@ const CourseRegistration = () => {
                                                 <td key={key}>{value.ROOMID}</td>
                                                 <td key={key}>{value.STARTTIME} - {value.ENDTIME}</td>
                                                 <td key={key}>{value.STARTDATE} - {value.ENDDATE}</td>
-                                                <input type='checkbox' className=''></input>
+                                                <input type='checkbox' className='scale-[25%]'></input>
                                             </tr>
                                         );
                                     })}
                                 </table>
+                                <div className='inline justify-between'>
+                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Back</button>
+                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Confirm</button>
+                                </div>
                             </div>
                         )}
                         {activeMenu === 'dropCourse' && (
