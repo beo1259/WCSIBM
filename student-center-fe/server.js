@@ -139,13 +139,20 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/courses', (req, res) => {
+  const studentID = req.query.studentID;
+
   ibmdb.open(connStr, (err, conn) => {
     if (err) {
       console.error('db connection error:', err);
       return res.status(500).send('Unable to connect to the database');
     }
 
-    const query = `SELECT CourseID, CourseName FROM STUCENTR.Course`;
+    const query = `SELECT C.CourseID, C.CourseName 
+      FROM STUCENTR.Course C
+      LEFT JOIN STUCENTR.ENROLLMENT E 
+          ON E.COURSEID = C.COURSEID
+          AND E.STUDENTID = '${studentID}'
+      WHERE E.COURSEID IS NULL`;
 
     conn.query(query, (err, data) => {
       if (err) {
@@ -251,6 +258,7 @@ app.get('/api/student-labs', (req, res) => {
   });
 });
 
+//Get program information for a student
 app.get('/api/student-program', (req, res) => {
   const studentId = req.query.studentId;
 
@@ -318,6 +326,40 @@ app.get('/api/student-grades', (req, res) => {
     });
   });
 });
+//Get all course lecture and lab information
+app.get('/api/course-information', (req, res) => {
+  let courseID = req.query.courseID;
+
+  ibmdb.open(connStr, (err, conn) => {
+    if (err) {
+      console.error('Connection error:', err);
+      return res.status(500).json({ error: 'Unable to connect to the database' });
+    }
+
+    const query = `SELECT * FROM STUCENTR.LECTURE WHERE COURSEID='${courseID}'`;
+    const query2 = `SELECT * FROM STUCENTR.LAB WHERE COURSEID='${courseID}'`;
+    //Query lecture data
+    conn.query(query, (err, data) => {
+      if (err) {
+        console.error('Query error:', err);
+        conn.close();
+        return res.status(500).json({ error: 'Failed to retrieve program information' });
+      }
+      //Query lab data
+      conn.query(query2, (err, data2) => {
+        if (err) {
+          console.error('Query error:', err);
+          conn.close();
+          return res.status(500).json({ error: 'Failed to retrieve program information' });
+        }
+        data = data.concat(data2);
+        res.status(200).send(data);
+        conn.close();
+      });
+    });
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
