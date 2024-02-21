@@ -360,6 +360,68 @@ app.get('/api/course-information', (req, res) => {
   });
 });
 
+//POST course to IBMDB2 database
+app.post('/api/enroll', (req, res) => {
+  const info = req.body;
+
+  //Generate a random enrollment id
+  let ENROLLMENTID = Math.random() * (999999 - 100000) + 100000;
+
+  if (!info.STUDENTID) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+
+  ibmdb.open(connStr, (err, conn) => {
+    if (err) {
+      console.error('Connection error:', err);
+      return res.status(500).json({ error: 'Unable to connect to the database' });
+    }
+
+    // Use the provided SQL command and modify it to use the parameterized studentId
+    const query = `INSERT INTO STUCENTR.LABENROLLMENT (LABID, COURSEID, STUDENTID, ATTENDANCESTATUS) VALUES
+    (${info.LABID}, '${info.COURSEID}', '${info.STUDENTID}', 'NULL')`;
+    
+    const query2 = `INSERT INTO STUCENTR.LECTUREENROLLMENT (LECTUREID, COURSEID, STUDENTID) VALUES
+    (${info.LECTUREID}, '${info.COURSEID}', '${info.STUDENTID}')`;
+    
+    const query3 = `INSERT INTO STUCENTR.ENROLLMENT (ENROLLMENTID, COURSEID, STUDENTID, YEAR) VALUES
+    (${ENROLLMENTID}, '${info.COURSEID}', '${info.STUDENTID}', 2024)`;
+
+    //Push to LABENROLLMENT
+    conn.query(query, (err, data) => {
+      if (err) {
+        console.error('Query error:', err);
+        conn.close();
+        return res.status(500).json({ error: 'Failed to post to lab enrollment' });
+      }
+      //Push to LECTUREENROLLMENT
+      conn.query(query2, (err, data2) => {
+        if (err) {
+          console.error('Query error:', err);
+          conn.close();
+          return res.status(500).json({ error: 'Failed to post to lecture enrollment' });
+        }
+        try {
+          //Push to ENROLLMENT
+          conn.query(query3, (err, data3) => {
+          // Process the data to fit the schedule format if needed, or send as is
+          res.status(200).send('Data added successfully');
+          conn.close();
+        });
+        } catch (error) {
+          //If throws an error, generate another enrollment id
+          ENROLLMENTID = Math.random() * (999999 - 100000) + 100000;
+          //Push to ENROLLMENT
+          conn.query(query3, (err, data3) => {
+          // Process the data to fit the schedule format if needed, or send as is
+          res.status(200).send('Data added successfully');
+          conn.close();
+        });
+        }
+      });
+    });
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
