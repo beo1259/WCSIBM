@@ -132,6 +132,20 @@ const CourseRegistration = () => {
         setTempStoreLab(labs);
     }
 
+    //Set enrollment choices
+    const [expandedIndexes, updateExpandedIndexes] = useState([]);
+    const handleExpand = (index) => {
+    //Checks whether or not the clicked index is expanded
+    const isExpanded = expandedIndexes.includes(index);
+    //If item is in array, remove it from the array and return the rest, if it isn't, add it to the array
+    updateExpandedIndexes(isExpanded ? expandedIndexes.filter((i) => i !== index) : [...expandedIndexes, index]);
+    };
+
+    //Enroll the student in their selected labs and lectures
+    const enroll = () => {
+        console.log(expandedIndexes);
+    }
+
     return (
         <>
             <div className="fixed top-0 left-0 w-full z-50">
@@ -202,7 +216,7 @@ const CourseRegistration = () => {
                                                 <td key={key}>{value.ROOMID}</td>
                                                 <td key={key}>{value.STARTTIME} - {value.ENDTIME}</td>
                                                 <td key={key}>{value.STARTDATE} - {value.ENDDATE}</td>
-                                                <input type='checkbox' className='scale-[25%]'></input>
+                                                <input type='checkbox' className='scale-[25%]' onChange={() => handleExpand(value.LECTUREID)}></input>
                                             </tr>
                                         );
                                     })}
@@ -219,18 +233,18 @@ const CourseRegistration = () => {
                                     {tempStoreLab.map((value, key) => {
                                         return(
                                             <tr className='grid grid-cols-5 text-center'>
-                                                <td key={key}>{value.LABID}</td>
-                                                <td key={key}>{value.ROOMID}</td>
-                                                <td key={key}>{value.STARTTIME} - {value.ENDTIME}</td>
-                                                <td key={key}>{value.STARTDATE} - {value.ENDDATE}</td>
-                                                <input type='checkbox' className='scale-[25%]'></input>
+                                                <td key={key+tempStoreLab.length}>{value.LABID}</td>
+                                                <td key={key+tempStoreLab.length}>{value.ROOMID}</td>
+                                                <td key={key+tempStoreLab.length}>{value.STARTTIME} - {value.ENDTIME}</td>
+                                                <td key={key+tempStoreLab.length}>{value.STARTDATE} - {value.ENDDATE}</td>
+                                                <input type='checkbox' className='scale-[25%]' onChange={() => handleExpand(value.LABID)}></input>
                                             </tr>
                                         );
                                     })}
                                 </table>
                                 <div className='inline justify-between'>
                                     <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Back</button>
-                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Confirm</button>
+                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={enroll}>Confirm</button>
                                 </div>
                             </div>
                         )}
