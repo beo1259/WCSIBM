@@ -14,6 +14,7 @@ const CourseRegistration = () => {
     //Temp to display for confirmation message
     const [tempStoreLecture, setTempStoreLecture] = useState([]);
     const [tempStoreLab, setTempStoreLab] = useState([]);
+    const [tempStoreCourseID, setTempStoreCourseID] = useState('');
 
     const [activeMenu, setActiveMenu] = useState('schedule');
 
@@ -130,20 +131,41 @@ const CourseRegistration = () => {
         }
         setTempStoreLecture(lectures);
         setTempStoreLab(labs);
+        setTempStoreCourseID(courseID);
+    }
+    //Temp to display for confirmation message
+    const [storeLecture, setStoreLecture] = useState(0);
+    const handleLecture = (lectureID) => {
+        setStoreLecture(lectureID);
     }
 
-    //Set enrollment choices
-    const [expandedIndexes, updateExpandedIndexes] = useState([]);
-    const handleExpand = (index) => {
-    //Checks whether or not the clicked index is expanded
-    const isExpanded = expandedIndexes.includes(index);
-    //If item is in array, remove it from the array and return the rest, if it isn't, add it to the array
-    updateExpandedIndexes(isExpanded ? expandedIndexes.filter((i) => i !== index) : [...expandedIndexes, index]);
-    };
+    const [storeLab, setStoreLab] = useState(0);
+    const handleLab = (labID) => {
+        setStoreLab(labID);
+    }
 
     //Enroll the student in their selected labs and lectures
-    const enroll = () => {
-        console.log(expandedIndexes);
+    const enroll = async () => {
+        //Create REQ body
+        const enrollmentInformation = {
+            LECTUREID: storeLecture,
+            LABID: storeLab,
+            STUDENTID: stuID,
+            COURSEID: tempStoreCourseID
+        }
+        //Fetch API call
+        const response = await fetch(`http://localhost:3005/api/enroll`,{
+            method: 'POST',
+            headers: {'Content-Type': "application/json"},
+            body: JSON.stringify(enrollmentInformation)
+        });
+        if (!response.ok) {
+            alert('Enrollment Unsuccessful')
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        //Return to calendar
+        setInfo(!isInfo);
+        setActiveMenu('schedule');
     }
 
     return (
@@ -216,7 +238,7 @@ const CourseRegistration = () => {
                                                 <td key={key}>{value.ROOMID}</td>
                                                 <td key={key}>{value.STARTTIME} - {value.ENDTIME}</td>
                                                 <td key={key}>{value.STARTDATE} - {value.ENDDATE}</td>
-                                                <input type='checkbox' className='scale-[25%]' onChange={() => handleExpand(value.LECTUREID)}></input>
+                                                <input type='radio' className='scale-[25%]' name='lectureRadio' onChange={() => handleLecture(value.LECTUREID)}></input>
                                             </tr>
                                         );
                                     })}
@@ -237,7 +259,7 @@ const CourseRegistration = () => {
                                                 <td key={key+tempStoreLab.length}>{value.ROOMID}</td>
                                                 <td key={key+tempStoreLab.length}>{value.STARTTIME} - {value.ENDTIME}</td>
                                                 <td key={key+tempStoreLab.length}>{value.STARTDATE} - {value.ENDDATE}</td>
-                                                <input type='checkbox' className='scale-[25%]' onChange={() => handleExpand(value.LABID)}></input>
+                                                <input type='radio' className='scale-[25%]' name='labRadio' onChange={() => handleLab(value.LABID)}></input>
                                             </tr>
                                         );
                                     })}
