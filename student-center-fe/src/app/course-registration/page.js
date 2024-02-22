@@ -168,6 +168,35 @@ const CourseRegistration = () => {
         setActiveMenu('schedule');
     }
 
+    //Delete a course boolean
+    const [deleteInfo, setDeleteInfo] = useState(false);
+    const handleDelete = (courseID) => {
+        setTempStoreCourseID(courseID);
+        setDeleteInfo(!deleteInfo);
+    }
+
+    //Unenroll function
+    const unenroll = async () => {
+        //Create REQ body
+        const enrollmentInformation = {
+            STUDENTID: stuID,
+            COURSEID: tempStoreCourseID
+        }
+        //Fetch API call
+        const response = await fetch(`http://localhost:3005/api/unenroll`,{
+            method: 'DELETE',
+            headers: {'Content-Type': "application/json"},
+            body: JSON.stringify(enrollmentInformation)
+        });
+        if (!response.ok) {
+            alert('Unenrollment Unsuccessful')
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        //Return to calendar
+        setDeleteInfo(!deleteInfo);
+        setActiveMenu('schedule');
+    }
+
     return (
         <>
             <div className="fixed top-0 left-0 w-full z-50">
@@ -270,19 +299,28 @@ const CourseRegistration = () => {
                                 </div>
                             </div>
                         )}
-                        {activeMenu === 'dropCourse' && (
+                        {activeMenu === 'dropCourse' && !deleteInfo && (
                             <div>
                                 <h2 className="text-2xl font-semibold mb-2">Drop Course</h2>
                                 <div className="space-y-2">
                                     {enrolledCourses.map((course) => (
                                         <button
                                             key={course.COURSEID}
-                                            onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
+                                            onClick={() => handleDelete(course.COURSEID)}
                                             className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
                                         >
                                             {course.COURSEID}
                                         </button>
                                     ))}
+                                </div>
+                            </div>
+                        )}
+                        {activeMenu === 'dropCourse' && deleteInfo && (
+                            <div>
+                                <p>Do you want to unenroll from {tempStoreCourseID}</p>
+                                <div className='inline justify-between'>
+                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleDelete}>Back</button>
+                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={unenroll}>Confirm</button>
                                 </div>
                             </div>
                         )}

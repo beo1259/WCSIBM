@@ -438,9 +438,9 @@ app.delete('/api/unenroll', (req, res) => {
     }
 
     // Use the provided SQL command and modify it to use the parameterized studentId
-    const query = `DELETE FROM STUCENTR.LABENROLLMENT WHERE LABID = ${info.LABID} AND STUDENTID = '${info.STUDENTID}'`;
+    const query = `DELETE FROM STUCENTR.LABENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
     
-    const query2 = `DELETE FROM STUCENTR.LECTUREENROLLMENT WHERE LECTUREID = ${info.LECTUREID} AND STUDENTID = '${info.STUDENTID}'`;
+    const query2 = `DELETE FROM STUCENTR.LECTUREENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
     
     const query3 = `DELETE FROM STUCENTR.ENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
 
