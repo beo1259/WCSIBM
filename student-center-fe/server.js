@@ -416,8 +416,54 @@ app.post('/api/enroll', (req, res) => {
           // Process the data to fit the schedule format if needed, or send as is
           res.status(200).send('Data added successfully');
           conn.close();
-        });
+          });
         }
+      });
+    });
+  });
+});
+
+//POST course to IBMDB2 database
+app.delete('/api/unenroll', (req, res) => {
+  const info = req.body;
+
+  if (!info.STUDENTID) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+
+  ibmdb.open(connStr, (err, conn) => {
+    if (err) {
+      console.error('Connection error:', err);
+      return res.status(500).json({ error: 'Unable to connect to the database' });
+    }
+
+    // Use the provided SQL command and modify it to use the parameterized studentId
+    const query = `DELETE FROM STUCENTR.LABENROLLMENT WHERE LABID = ${info.LABID} AND STUDENTID = '${info.STUDENTID}'`;
+    
+    const query2 = `DELETE FROM STUCENTR.LECTUREENROLLMENT WHERE LECTUREID = ${info.LECTUREID} AND STUDENTID = '${info.STUDENTID}'`;
+    
+    const query3 = `DELETE FROM STUCENTR.ENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
+
+    //Delete Fropm LABENROLLMENT
+    conn.query(query, (err, data) => {
+      if (err) {
+        console.error('Query error:', err);
+        conn.close();
+        return res.status(500).json({ error: 'Failed to delete from lab enrollment' });
+      }
+      //Delete From LECTUREENROLLMENT
+      conn.query(query2, (err, data2) => {
+        if (err) {
+          console.error('Query error:', err);
+          conn.close();
+          return res.status(500).json({ error: 'Failed to delete from lecture enrollment' });
+        }
+          //Delete From ENROLLMENT
+          conn.query(query3, (err, data3) => {
+          // Process the data to fit the schedule format if needed, or send as is
+          res.status(200).send('Data deleted successfully');
+          conn.close();
+        });
       });
     });
   });
