@@ -358,7 +358,7 @@ def generate_schedule(student_id, catA, catB, catC, catEssay, progAmt):
         # Prepare the course data dictionary
         course_data = {
             "COURSEID": course['COURSEID'],
-            "TYPE": course.get('Type', 'Lecture'),  # Use .get() to handle missing 'Type' key gracefully
+            "TYPE": course.get('Type', 'Lecture'),
             "STARTTIME": course['STARTTIME'].strftime('%H:%M:%S') if hasattr(course['STARTTIME'], 'strftime') else course['STARTTIME'],
             "ENDTIME": course['ENDTIME'].strftime('%H:%M:%S') if hasattr(course['ENDTIME'], 'strftime') else course['ENDTIME'],
             "WEEKDAY": course['WEEKDAY'],
