@@ -51,6 +51,13 @@ SELECT DISTINCT(STUDENTID) FROM STUCENTR.PREVENROLLMENT;
 
 DELETE FROM STUCENTR.Enrollment WHERE CourseID = 'PSY2032';
 
+SELECT G.GRADE, C.COURSENAME, C.COURSEID
+      FROM STUCENTR.GRADE G
+      INNER JOIN STUCENTR.PREVENROLLMENT PE ON PE.PREVENROLLMENTID = G.PREVENROLLMENTID
+      INNER JOIN STUCENTR.STUDENT S ON S.STUDENTID = PE.STUDENTID
+      INNER JOIN STUCENTR.COURSE C ON C.COURSEID = PE.COURSEID
+      WHERE S.STUDENTID = 823321975;
+
 INSERT INTO STUCENTR.Enrollment (EnrollmentID, CourseID, StudentID) VALUES (986234, 'CS2212', 823321975);
 INSERT INTO STUCENTR.Enrollment (EnrollmentID, CourseID, StudentID) VALUES (491234, 'CS2208', 823321975);
 INSERT INTO STUCENTR.Enrollment (EnrollmentID, CourseID, StudentID) VALUES (218423, 'CS2209', 823321975);
@@ -86,6 +93,12 @@ CREATE TABLE STUCENTR.Grade(
 	FOREIGN KEY(PrevEnrollmentID) REFERENCES STUCENTR.PrevEnrollment(PrevEnrollmentID),
 	PRIMARY KEY (PrevEnrollmentID)
 	);
+	
+SELECT c.COURSEID, c.ESSAYCREDIT, l.STARTTIME, l.ENDTIME, l.WEEKDAY, l.STARTDATE, l.ENDDATE, c.BREADTH
+FROM STUCENTR.Course c
+JOIN STUCENTR.Lecture l ON c.COURSEID = l.COURSEID
+WHERE c.BREADTH IN ('ST', 'SS', 'AH');
+
 
 CREATE TABLE STUCENTR.Student (
 	StudentID INT PRIMARY KEY NOT NULL,
@@ -95,6 +108,38 @@ CREATE TABLE STUCENTR.Student (
 	FirstName VARCHAR(100),
 	LastName VARCHAR(100)
 );
+
+SELECT 
+            s.StudentID,
+            c.CourseID,
+            c.CourseName,
+            c.Breadth,
+            c.EssayCredit
+        FROM 
+            STUCENTR.Student s
+        JOIN 
+            STUCENTR.Enrollment e ON s.StudentID = e.StudentID
+        JOIN 
+            STUCENTR.Course c ON e.CourseID = c.CourseID
+        WHERE 
+            s.StudentID = 823321975 AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
+        UNION
+        SELECT 
+            s.StudentID,
+            c.CourseID,
+            c.CourseName,
+            c.Breadth,
+            c.EssayCredit
+        FROM 
+            STUCENTR.Student s
+        JOIN 
+            STUCENTR.PrevEnrollment pe ON s.StudentID = pe.StudentID
+        JOIN 
+            STUCENTR.Course c ON pe.CourseID = c.CourseID
+        WHERE 
+            s.StudentID = 823321975 AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
+        ORDER BY 
+            CourseID;
 
 -- Step 1: Drop the primary key constraint
 ALTER TABLE STUCENTR.Course
@@ -186,6 +231,39 @@ CREATE TABLE STUCENTR.Grade (
 	FOREIGN KEY (EnrollmentID) REFERENCES STUCENTR.Enrollment(EnrollmentID)
 );
 
+SELECT 
+    s.StudentID,
+    c.CourseID,
+    c.CourseName,
+    c.Breadth,
+    c.EssayCredit
+FROM 
+    STUCENTR.Student s
+JOIN 
+    STUCENTR.Enrollment e ON s.StudentID = e.StudentID
+JOIN 
+    STUCENTR.Course c ON e.CourseID = c.CourseID
+WHERE 
+    s.StudentID = 823321975 AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
+UNION
+SELECT 
+    s.StudentID,
+    c.CourseID,
+    c.CourseName,
+    c.Breadth,
+    c.EssayCredit
+FROM 
+    STUCENTR.Student s
+JOIN 
+    STUCENTR.PrevEnrollment pe ON s.StudentID = pe.StudentID
+JOIN 
+    STUCENTR.Course c ON pe.CourseID = c.CourseID
+WHERE 
+    s.StudentID = 823321975 AND (c.Breadth IS NOT NULL OR c.EssayCredit IS NOT NULL)
+ORDER BY 
+    CourseID;
+
+
 CREATE TABLE STUCENTR.Professor(
 	ProfessorID INT PRIMARY KEY NOT NULL,
 	ProgramID INT,
@@ -194,9 +272,24 @@ CREATE TABLE STUCENTR.Professor(
 	FOREIGN KEY (ProgramID) REFERENCES STUCENTR.Program(ProgramID)
 );
 
-UPDATE STUCENTR.Student
-SET FirstName = 'Frank'
-WHERE FirstName  = 'Russell';
+UPDATE STUCENTR.PrevEnrollment
+SET YEAR = 2022
+WHERE COURSEID  = 'ART1045';
+UPDATE STUCENTR.PrevEnrollment
+SET YEAR = 2022
+WHERE COURSEID  = 'ART1020';
+
+SELECT * FROM STUCENTR.PREVENROLLMENT;
+
+UPDATE STUCENTR.Lecture
+SET ENDTIME = '12:30:00'
+WHERE LECTUREID  = 5953698;
+UPDATE STUCENTR.Lecture
+SET WEEKDAY = 2
+WHERE LECTUREID  = 5953698;
+
+SELECT * FROM STUCENTR.Lecture;
+SELECT * FROM STUCENTR.Lab;
 
 ALTER TABLE STUCENTR.Student DROP COLUMN ESSAYCREDIT;
 
@@ -256,8 +349,8 @@ CREATE TABLE STUCENTR.Room (
 ALTER TABLE STUCENTR.Room
 DROP COLUMN RoomNumber;
 
-ALTER TABLE STUCENTR.Room
-ADD COLUMN RoomNumber INT;
+ALTER TABLE STUCENTR.Enrollment
+ADD COLUMN Year INT;
 
 INSERT INTO STUCENTR.Room (RoomID, LocationID, Capacity, RoomNumber) VALUES ('MC105', 'MC', 144, 105);
 
