@@ -52,6 +52,7 @@ const MyCalendarPage = () => {
                 start: lectureStartDateTime.toDate(),
                 end: moment(lectureStartDateTime).add(lectureDurationHours, 'hour').toDate(),
                 allDay: false,
+                professor: `${lecture.FIRSTNAME} ${lecture.LASTNAME}`
               });
             }
           }
@@ -79,7 +80,6 @@ const MyCalendarPage = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log(data)
         const labsArray = data.map((lab) => {
           console.log(lab)
           //Calculate the number of days between the start and end dates
@@ -110,6 +110,7 @@ const MyCalendarPage = () => {
                 start: labStartDateTime.toDate(),
                 end: moment(labStartDateTime).add(labDurationHours, 'hour').toDate(),
                 allDay: false,
+                professor: `${lab.FIRSTNAME} ${lab.LASTNAME}`
               });
             }
           }
@@ -169,6 +170,7 @@ const MyCalendarPage = () => {
       <div>{moment(event.start).format('dddd, MMMM Do YYYY')}</div>
       <div>Start time: {moment(event.start).format('h:mma')}</div>
       <div>End time: {moment(event.end).format('h:mma')}</div>
+      <div>Professor: {event.professor}</div> 
       <hr/>
     </div>
   ));

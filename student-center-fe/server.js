@@ -89,8 +89,8 @@ app.post('/generate-schedule', (req, res) => {
   const { catC } = req.body;
   const { catEssay } = req.body;
   const { progAmt } = req.body;
-  
-  
+
+
 
   const script = spawn('python', ['./schedule-generation-alg.py', studentID, catA, catB, catC, catEssay, progAmt]);
   let outputData = '';
@@ -205,9 +205,10 @@ app.get('/api/student-lectures', (req, res) => {
     }
 
     const query = `
-        SELECT L.*
+        SELECT L.*, P.FIRSTNAME, P.LASTNAME
         FROM STUCENTR.Lecture L
         INNER JOIN STUCENTR.LectureEnrollment LE ON L.LectureID = LE.LectureID
+        INNER JOIN STUCENTR.Professor P ON L.ProfessorID = P.ProfessorID
         WHERE LE.StudentID = ?
       `;
 
@@ -239,10 +240,12 @@ app.get('/api/student-labs', (req, res) => {
 
     // Use the provided SQL command and modify it to use the parameterized studentId
     const query = `
-        SELECT L.*
-        FROM STUCENTR.Lab L
-        INNER JOIN STUCENTR.LabEnrollment LE ON L.LabID = LE.LabID
-        WHERE LE.StudentID = ?
+      SELECT L.*, P.FIRSTNAME, P.LASTNAME
+      FROM STUCENTR.Lab L
+      INNER JOIN STUCENTR.LabEnrollment LE ON L.LabID = LE.LabID
+      INNER JOIN STUCENTR.Professor P ON L.ProfessorID = P.ProfessorID
+      WHERE LE.StudentID = ?
+    
       `;
 
     conn.query(query, [studentId], (err, data) => {
@@ -305,7 +308,7 @@ app.get('/api/student-grades', (req, res) => {
       console.error('Connection error:', err);
       return res.status(500).json({ error: 'Unable to connect to the database' });
     }
-    
+
     const query = `
       SELECT G.GRADE, C.COURSENAME, C.COURSEID, PE.YEAR
       FROM STUCENTR.GRADE G
@@ -380,10 +383,10 @@ app.post('/api/enroll', (req, res) => {
     // Use the provided SQL command and modify it to use the parameterized studentId
     const query = `INSERT INTO STUCENTR.LABENROLLMENT (LABID, COURSEID, STUDENTID, ATTENDANCESTATUS) VALUES
     (${info.LABID}, '${info.COURSEID}', '${info.STUDENTID}', 'NULL')`;
-    
+
     const query2 = `INSERT INTO STUCENTR.LECTUREENROLLMENT (LECTUREID, COURSEID, STUDENTID) VALUES
     (${info.LECTUREID}, '${info.COURSEID}', '${info.STUDENTID}')`;
-    
+
     const query3 = `INSERT INTO STUCENTR.ENROLLMENT (ENROLLMENTID, COURSEID, STUDENTID, YEAR) VALUES
     (${ENROLLMENTID}, '${info.COURSEID}', '${info.STUDENTID}', 2024)`;
 
@@ -404,18 +407,18 @@ app.post('/api/enroll', (req, res) => {
         try {
           //Push to ENROLLMENT
           conn.query(query3, (err, data3) => {
-          // Process the data to fit the schedule format if needed, or send as is
-          res.status(200).send('Data added successfully');
-          conn.close();
-        });
+            // Process the data to fit the schedule format if needed, or send as is
+            res.status(200).send('Data added successfully');
+            conn.close();
+          });
         } catch (error) {
           //If throws an error, generate another enrollment id
           ENROLLMENTID = Math.random() * (999999 - 100000) + 100000;
           //Push to ENROLLMENT
           conn.query(query3, (err, data3) => {
-          // Process the data to fit the schedule format if needed, or send as is
-          res.status(200).send('Data added successfully');
-          conn.close();
+            // Process the data to fit the schedule format if needed, or send as is
+            res.status(200).send('Data added successfully');
+            conn.close();
           });
         }
       });
@@ -439,9 +442,9 @@ app.delete('/api/unenroll', (req, res) => {
 
     // Use the provided SQL command and modify it to use the parameterized studentId
     const query = `DELETE FROM STUCENTR.LABENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
-    
+
     const query2 = `DELETE FROM STUCENTR.LECTUREENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
-    
+
     const query3 = `DELETE FROM STUCENTR.ENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
 
     //Delete Fropm LABENROLLMENT
@@ -458,8 +461,8 @@ app.delete('/api/unenroll', (req, res) => {
           conn.close();
           return res.status(500).json({ error: 'Failed to delete from lecture enrollment' });
         }
-          //Delete From ENROLLMENT
-          conn.query(query3, (err, data3) => {
+        //Delete From ENROLLMENT
+        conn.query(query3, (err, data3) => {
           // Process the data to fit the schedule format if needed, or send as is
           res.status(200).send('Data deleted successfully');
           conn.close();

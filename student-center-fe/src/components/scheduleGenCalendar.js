@@ -240,13 +240,13 @@ const ScheduleGenerationCalendar = () => {
             <div className="mt-6">
                 <label className='font-bold' id="cata">How many program courses would you like to take? <span className='font-normal '>Default 3. <span className='font-normal underline'>Select (1-5)</span> </span></label>
                 <input className='border-2 border-purple-300 rounded-md w-9' list="progReqs" onChange={handProgChange} />
-                <datalist id="progReqs">
+                <select id="progReqs">
                     <option value="1" />
                     <option value="2" />
                     <option value="3" />
                     <option value="4" />
                     <option value="5" />
-                </datalist>
+                </select>
 
 
                 <p>You still need <span className="font-bold">{courseTotals.finalSS} </span><span className="underline"><a href="https://www.uwo.ca/arts/counselling/your_degree/breadth_requirements.html" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">Category A 'Social Science'</a></span> course(s) to graduate.
