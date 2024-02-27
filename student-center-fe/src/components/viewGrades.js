@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react';
+import Header from './header';
 
 const GradesPage = () => {
   const [grades, setGrades] = useState([]);
@@ -41,9 +42,11 @@ const GradesPage = () => {
   }
 
   return (
-    <div className='bg-white p-6'>
+    <>
+    <Header/>
+    <div className='bg-white p-6 h-screen'>
       <h1 className="text-3xl font-bold mb-6 text-purple-800">View Grades</h1>
-      <div className="flex items-center mb-6">
+      <div className="flex items-center bg-white mb-6">
         <label className="font-bold mr-4 text-purple-800">Select Year:</label>
         <select className="border border-purple-300 px-3 py-1 rounded-md text-black" value={chosenYear} onChange={handleYearChange}>
           {yearOptions}
@@ -70,6 +73,7 @@ const GradesPage = () => {
         </tbody>
       </table>
     </div>
+    </>
   );
 };
 
