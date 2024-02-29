@@ -53,7 +53,7 @@ ibm_db.close(conn)
 # FTP details
 ftp_hostname = '204.90.115.200'
 ftp_username = 'z41780'
-ftp_password = 'GEM31DUN'
+ftp_password = 'TEA03POX'
 remote_file_path = '/z/z41780/WCS-IBM/data/course_data.txt'
 
 # FTP transfer
