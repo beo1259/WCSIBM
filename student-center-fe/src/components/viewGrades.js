@@ -74,7 +74,7 @@ const GradesPage = () => {
           </select>
           {/* Directly display the average for the selected year */}
           <span className="font-bold text-purple-800">
-            Average: {averageValueObject}
+            Average: {averageValueObject} (mid, get better.)
           </span>
         </div>
         <table className="w-full border-collapse border border-purple-300 rounded-md">
