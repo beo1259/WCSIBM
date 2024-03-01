@@ -82,6 +82,38 @@ app.get('/course-category', (req, res) => {
   });
 });
 
+app.post('/get-average', (req, res) => {
+  const { studentID, year } = req.body;
+  console.log(`Received studentID: ${studentID}, year: ${year}`);
+
+  const script = spawn('python3', ['./exec-gpa.py', studentID, year]);
+  let outputData = '';
+
+  script.stdout.on('data', (data) => {
+    outputData += data.toString();
+  });
+
+  script.stderr.on('data', (data) => {
+    console.error(`stderr: ${data.toString()}`);
+  });
+
+  script.on('close', (code) => {
+    console.log(`Child process exited with code ${code}`);
+    console.log(outputData.trim())
+    if (code === 0) {
+      res.send(outputData.trim());
+    } else {
+      res.status(500).send('Error executing script');
+    }
+  });
+
+  script.on('error', (error) => {
+    console.error('Failed to start script:', error);
+    res.status(500).send('Error starting script');
+  });
+});
+
+
 app.post('/generate-schedule', (req, res) => {
   const { studentID } = req.body;
   const { catA } = req.body;
@@ -89,8 +121,6 @@ app.post('/generate-schedule', (req, res) => {
   const { catC } = req.body;
   const { catEssay } = req.body;
   const { progAmt } = req.body;
-  
-  
 
   const script = spawn('python', ['./schedule-generation-alg.py', studentID, catA, catB, catC, catEssay, progAmt]);
   let outputData = '';
@@ -98,6 +128,7 @@ app.post('/generate-schedule', (req, res) => {
   // Listen for data from the script
   script.stdout.on('data', (data) => {
     outputData += data.toString();
+    
   });
 
   script.on('close', (code) => {
@@ -295,7 +326,6 @@ app.get('/api/student-program', (req, res) => {
 //Gets grades for a specific student
 app.get('/api/student-grades', (req, res) => {
   const studentId = req.query.studentID;
-  console.log("hi")
   if (!studentId) {
     return res.status(400).json({ error: 'Student ID is required' });
   }
@@ -305,7 +335,7 @@ app.get('/api/student-grades', (req, res) => {
       console.error('Connection error:', err);
       return res.status(500).json({ error: 'Unable to connect to the database' });
     }
-    
+
     const query = `
       SELECT G.GRADE, C.COURSENAME, C.COURSEID, PE.YEAR
       FROM STUCENTR.GRADE G
@@ -380,10 +410,10 @@ app.post('/api/enroll', (req, res) => {
     // Use the provided SQL command and modify it to use the parameterized studentId
     const query = `INSERT INTO STUCENTR.LABENROLLMENT (LABID, COURSEID, STUDENTID, ATTENDANCESTATUS) VALUES
     (${info.LABID}, '${info.COURSEID}', '${info.STUDENTID}', 'NULL')`;
-    
+
     const query2 = `INSERT INTO STUCENTR.LECTUREENROLLMENT (LECTUREID, COURSEID, STUDENTID) VALUES
     (${info.LECTUREID}, '${info.COURSEID}', '${info.STUDENTID}')`;
-    
+
     const query3 = `INSERT INTO STUCENTR.ENROLLMENT (ENROLLMENTID, COURSEID, STUDENTID, YEAR) VALUES
     (${ENROLLMENTID}, '${info.COURSEID}', '${info.STUDENTID}', 2024)`;
 
@@ -404,18 +434,18 @@ app.post('/api/enroll', (req, res) => {
         try {
           //Push to ENROLLMENT
           conn.query(query3, (err, data3) => {
-          // Process the data to fit the schedule format if needed, or send as is
-          res.status(200).send('Data added successfully');
-          conn.close();
-        });
+            // Process the data to fit the schedule format if needed, or send as is
+            res.status(200).send('Data added successfully');
+            conn.close();
+          });
         } catch (error) {
           //If throws an error, generate another enrollment id
           ENROLLMENTID = Math.random() * (999999 - 100000) + 100000;
           //Push to ENROLLMENT
           conn.query(query3, (err, data3) => {
-          // Process the data to fit the schedule format if needed, or send as is
-          res.status(200).send('Data added successfully');
-          conn.close();
+            // Process the data to fit the schedule format if needed, or send as is
+            res.status(200).send('Data added successfully');
+            conn.close();
           });
         }
       });
@@ -439,9 +469,9 @@ app.delete('/api/unenroll', (req, res) => {
 
     // Use the provided SQL command and modify it to use the parameterized studentId
     const query = `DELETE FROM STUCENTR.LABENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
-    
+
     const query2 = `DELETE FROM STUCENTR.LECTUREENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
-    
+
     const query3 = `DELETE FROM STUCENTR.ENROLLMENT WHERE COURSEID = '${info.COURSEID}' AND STUDENTID = '${info.STUDENTID}'`;
 
     //Delete Fropm LABENROLLMENT
@@ -458,8 +488,8 @@ app.delete('/api/unenroll', (req, res) => {
           conn.close();
           return res.status(500).json({ error: 'Failed to delete from lecture enrollment' });
         }
-          //Delete From ENROLLMENT
-          conn.query(query3, (err, data3) => {
+        //Delete From ENROLLMENT
+        conn.query(query3, (err, data3) => {
           // Process the data to fit the schedule format if needed, or send as is
           res.status(200).send('Data deleted successfully');
           conn.close();
