@@ -8,7 +8,8 @@ def format_fixed_width(record):
     formatted_record = ''
     formatted_record += str(record['PREVENROLLMENTID']).ljust(7)
     formatted_record += str(record['STUDENTID']).ljust(10)
-    formatted_record += str(record['COURSEID']).ljust(1)  
+    formatted_record += str(record['COURSEID']).ljust(10)
+    formatted_record += str(record['YEAR']).ljust(1)  
 
     return formatted_record + '\n'  # Add a newline at the end of each record
 
