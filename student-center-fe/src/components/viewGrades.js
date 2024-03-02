@@ -73,10 +73,11 @@ const GradesPage = () => {
             {yearOptions}
           </select>
           {/* Directly display the average for the selected year */}
-          <span className="font-bold text-purple-800">
-            Average: {averageValueObject} (mid, get better.)
-          </span>
+          
         </div>
+        <div className="font-normal text-xl text-purple-800 flex mb-3">
+            Average mark for {yearChosen} <span className='font-bold'>: {averageValueObject}</span>
+          </div>
         <table className="w-full border-collapse border border-purple-300 rounded-md">
           <thead>
             <tr className="bg-purple-200">
@@ -86,7 +87,7 @@ const GradesPage = () => {
           </thead>
           <tbody>
             {grades.filter(grade => grade.YEAR == chosenYear).map((grade, index) => (
-              <tr key={index} className="hover:bg-purple-100">
+              <tr key={index}>
                 <td className="border border-purple-300 text-black px-4 py-2">{grade.COURSENAME}</td>
                 <td className="border border-purple-300 text-black px-4 py-2">{grade.GRADE}</td>
               </tr>
