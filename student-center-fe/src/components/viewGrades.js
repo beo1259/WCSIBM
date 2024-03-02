@@ -60,7 +60,7 @@ const GradesPage = () => {
   // Generate year options from grades data
   const yearOptions = Array.from(new Set(grades.map(grade => grade.YEAR)))
     .sort((a, b) => a - b)
-    .map(year => <option key={year} value={year}>{year}</option>);
+    .map(year => <option key={year} value={year}>{year} - {year + 1}</option>);
 
   return (
     <>
