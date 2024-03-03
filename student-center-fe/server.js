@@ -113,6 +113,37 @@ app.post('/get-average', (req, res) => {
   });
 });
 
+app.post('/get-prereqs', (req, res) => {
+  const { studentID } = req.body;
+  console.log(`Received studentID: ${studentID}`);
+
+  const script = spawn('python3', ['./exec-prereq.py', studentID]);
+  let outputData = '';
+
+  script.stdout.on('data', (data) => {
+    outputData += data.toString();
+  });
+
+  script.stderr.on('data', (data) => {
+    console.error(`stderr: ${data.toString()}`);
+  });
+
+  script.on('close', (code) => {
+    console.log(`Child process exited with code ${code}`);
+    console.log(outputData.trim())
+    if (code === 0) {
+      res.send(outputData.trim());
+    } else {
+      res.status(500).send('Error executing script');
+    }
+  });
+
+  script.on('error', (error) => {
+    console.error('Failed to start script:', error);
+    res.status(500).send('Error starting script');
+  });
+});
+
 
 app.post('/generate-schedule', (req, res) => {
   const { studentID } = req.body;
