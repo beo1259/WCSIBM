@@ -56,7 +56,7 @@ const CourseRegistration = () => {
     console.log(stuID)
 
     useEffect(() => {
-        if (activeMenu === 'addCourse') {
+        if ((activeMenu === 'addCourse') || activeMenu === 'swapCourse') {
             fetch(`http://localhost:3005/api/courses?studentID=${stuID}`)
                 .then((response) => response.json())
                 .then((data) => {
@@ -196,6 +196,74 @@ const CourseRegistration = () => {
         setDeleteInfo(!deleteInfo);
         setActiveMenu('schedule');
     }
+    
+    //Enroll the student in their selected labs and lectures, Drop the student from their withdrawn labs and lectures
+    const swap = async () => {
+
+        const dropInformation = {
+            STUDENTID: stuID,
+            COURSEID: SelectedSwapDropCourse,
+        }
+        //Fetch API call
+        const dropresponse = await fetch(`http://localhost:3005/api/unenroll`,{
+            method: 'DELETE',
+            headers: {'Content-Type': "application/json"},
+            body: JSON.stringify(dropInformation)
+        });
+        if (!dropresponse.ok) {
+            alert('Unenrollment Unsuccessful')
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        //Create REQ body
+        const enrollmentInformation = {
+            LECTUREID: storeLecture,
+            LABID: storeLab,
+            STUDENTID: stuID,
+            COURSEID: tempStoreCourseID
+        }
+        //Fetch API call
+        const response = await fetch(`http://localhost:3005/api/enroll`,{
+            method: 'POST',
+            headers: {'Content-Type': "application/json"},
+            body: JSON.stringify(enrollmentInformation)
+        });
+        if (!response.ok) {
+            alert('Enrollment Unsuccessful')
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        //Return to calendar
+        setInfo(!isInfo);
+        setActiveMenu('schedule');
+        setSelectedSwapDropCourse(null)
+    }
+
+    // Function to handle course selection
+    const [SelectedSwapDropCourse, setSelectedSwapDropCourse] = useState(false);
+    const [confirmSwapDropCourse, setconfirmSwapDropCourse] = useState(false);
+
+    const setSelectedSwapDrop = (courseID) => {
+        setSelectedSwapDropCourse(courseID);
+    };
+
+    useEffect(() => {
+
+        if (confirmSwapDropCourse) {
+            setActiveMenu('swapCourse');
+        }
+    }, [confirmSwapDropCourse]);
+
+
+    // Function to handle cancelling the swap
+    const cancelSwapDrop = () => {
+        setSelectedSwapDropCourse(null);
+        setconfirmSwapDropCourse(false)
+    };
+
+    // function to handle confirming course to dro
+    const confirmSwapDrop = () => {
+        setconfirmSwapDropCourse(true)
+    };
 
     return (
         <>
@@ -226,9 +294,11 @@ const CourseRegistration = () => {
                                 <MyCalendarPage />
                             </div>
                         )}
-                        {activeMenu === 'addCourse' && !isInfo && (
+                        {(activeMenu === 'addCourse' || activeMenu === 'swapCourse') && !isInfo && (
                             <div>
-                                <h2 className="text-2xl font-semibold mb-2">Add Course</h2>
+                                <h2 className="text-2xl font-semibold mb-2">
+                                    {activeMenu === 'addCourse' ? 'Add Course' : 'Choose Course to Swap With'}
+                                 </h2>
                                 <input
                                     type="text"
                                     placeholder="Search courses..."
@@ -249,7 +319,7 @@ const CourseRegistration = () => {
                             </div>
                         )}
                         {/*Enrollment confirmation*/}
-                        {activeMenu === 'addCourse' && isInfo && (
+                        {(activeMenu === 'addCourse' || activeMenu === 'swapCourse') && isInfo && (
                             <div>
                                 <p className='font-semibold border-b-2 border-black mb-4'>Lectures</p>
                                 <table className='w-full p-6 divide-y-2'>
@@ -295,7 +365,17 @@ const CourseRegistration = () => {
                                 </table>
                                 <div className='inline justify-between'>
                                     <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Back</button>
-                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={enroll}>Confirm</button>
+                                    <button 
+                                    className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' 
+                                    onClick={() => {
+                                        if (activeMenu === 'addCourse') {
+                                            enroll(); // Call enroll function for addCourse menu
+                                        } 
+                                        else {
+                                            swap(); // Call swap function for swapCourse menu
+                                        } 
+                                    }}
+                                    >Confirm</button>
                                 </div>
                             </div>
                         )}
@@ -324,22 +404,35 @@ const CourseRegistration = () => {
                                 </div>
                             </div>
                         )}
-                        {activeMenu === 'swapCourses' && (
+                        {activeMenu === 'swapCourses' && !SelectedSwapDropCourse && (
                             <div>
                                 <h2 className="text-2xl font-semibold mb-2">Swap Courses</h2>
                                 <div className="space-y-2">
                                     {enrolledCourses.map((course) => (
                                         <button
                                             key={course.COURSEID}
-                                            onClick={() => console.log(`Selected course: ${course.COURSEID}`)}
+                                            onClick={() => setSelectedSwapDrop(course.COURSEID)}
                                             className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
                                         >
                                             {course.COURSEID}
                                         </button>
+                                        
                                     ))}
                                 </div>
                             </div>
                         )}
+                        {activeMenu === 'swapCourses' && SelectedSwapDropCourse && (
+
+                            <div>
+                                <p>Are you sure you want to swap {SelectedSwapDropCourse}?</p>
+                                <div className='inline justify-between'>
+                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={cancelSwapDrop}>Cancel</button>
+                                    <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={setconfirmSwapDropCourse}>Confirm</button>
+                                </div>
+
+                            </div>
+                        )}
+                        
                         {activeMenu === 'scheduleGeneration' && (
                             <div>
                                 <ScheduleGenerationCalendar />
