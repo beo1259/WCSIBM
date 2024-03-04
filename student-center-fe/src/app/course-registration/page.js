@@ -64,9 +64,12 @@ const CourseRegistration = () => {
             return "Already Taken";
         } 
         // Find the course in the prereqInfo array and check if it can be taken
-        else {
+        else if(prereqInfo.find(course => course.courseId === courseID)){
             const course = prereqInfo.find(course => course.courseId === courseID);
-            return course && course.canTake ? "Can Take" : "Cannot Take";
+            return course && course.canTake ? "Prerequisites met ✅" : "Prerequisites not met ❌";
+        }
+        else{
+            return "Prerequisites met ✅"
         }
     };
 
