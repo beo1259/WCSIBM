@@ -15,7 +15,7 @@ const CourseRegistration = () => {
     const [tempStoreLecture, setTempStoreLecture] = useState([]);
     const [tempStoreLab, setTempStoreLab] = useState([]);
     const [tempStoreCourseID, setTempStoreCourseID] = useState('');
-    const [prereqInfo, setPrereqInfo] = useState([]);
+    const [prereqInfo, setPrereqInfo] = useState(null);
     const [currInfo, setCurrInfo] = useState([]);
     const [prevInfo, setPrevInfo] = useState([]);
 
@@ -50,18 +50,16 @@ const CourseRegistration = () => {
     };
 
     const handleFilterChange = (description) => {
-        // Convert the description back to the array of prefixes or a single prefix
         const codes = courseFilters[description];
-        setFilter(codes); // Now 'filter' can be an array or a single string
+        setFilter(codes);
     };
 
     const filteredCourses = courses.filter((course) => {
         const courseLowercased = course.COURSENAME.toLowerCase();
         const searchTermIncluded = courseLowercased.includes(searchTerm) || course.COURSEID.toLowerCase().includes(searchTerm);
 
-        if (!filter) return searchTermIncluded; // No filter selected
+        if (!filter) return searchTermIncluded; 
 
-        // Check if the filter is an array and adjust the logic
         if (Array.isArray(filter)) {
             return searchTermIncluded && filter.some(prefix => course.COURSEID.startsWith(prefix));
         } else {
@@ -82,6 +80,9 @@ const CourseRegistration = () => {
 
     const courseStatus = (courseID) => {
         // Check if the course is in the currently enrolled courses
+        if(prereqInfo == null){
+            return "Loading...";
+        }
         if (currInfo.includes(courseID)) {
             return "Currently Taking";
         }
@@ -94,9 +95,10 @@ const CourseRegistration = () => {
             const course = prereqInfo.find(course => course.courseId === courseID);
             return course && course.canTake ? "Prerequisites met ✅" : "Prerequisites not met ❌";
         }
-        else {
-            return "Prerequisites met ✅"
+        else if (!prereqInfo.find(course => course.courseId === courseID)) {
+            return "Prerequisites met ✅";
         }
+        
     };
 
     let stuID = sessionStorage.getItem('studentId')
@@ -145,7 +147,7 @@ const CourseRegistration = () => {
 
         console.log(stuID)
 
-        if (activeMenu === 'schedule' && stuID) {
+        if (stuID) {
             fetchStudentLectures();
 
         }
@@ -404,7 +406,7 @@ const CourseRegistration = () => {
                                     <label htmlFor="courseFilter" className="font-bold text-purple-900 blocktext-sm font-xl text-gray-700">Filter by department:</label>
                                     <select
                                         onChange={(e) => handleFilterChange(e.target.value)}
-                                        className='ml-2 border-2 border-slate-400 rounded-md'
+                                        className='ml-2'
                                     >
                                         <option value="">All</option>
                                         {Object.keys(courseFilters).map(description => (
