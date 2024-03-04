@@ -36,7 +36,7 @@ const CourseRegistration = () => {
     let [courses, setCourses] = useState([]);
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-
+    const [filter, setFilter] = useState('');
 
     //useState for course information
     const [isInfo, setInfo] = useState(false);
@@ -49,26 +49,52 @@ const CourseRegistration = () => {
         setSearchTerm(event.target.value.toLowerCase());
     };
 
-    // Filtered list of courses based on the search term
-    const filteredCourses = courses.filter((course) =>
-        course.COURSENAME.toLowerCase().includes(searchTerm) || course.COURSEID.toLowerCase().includes(searchTerm)
-    );
+    const handleFilterChange = (description) => {
+        // Convert the description back to the array of prefixes or a single prefix
+        const codes = courseFilters[description];
+        setFilter(codes); // Now 'filter' can be an array or a single string
+    };
+
+    const filteredCourses = courses.filter((course) => {
+        const courseLowercased = course.COURSENAME.toLowerCase();
+        const searchTermIncluded = courseLowercased.includes(searchTerm) || course.COURSEID.toLowerCase().includes(searchTerm);
+
+        if (!filter) return searchTermIncluded; // No filter selected
+
+        // Check if the filter is an array and adjust the logic
+        if (Array.isArray(filter)) {
+            return searchTermIncluded && filter.some(prefix => course.COURSEID.startsWith(prefix));
+        } else {
+            return searchTermIncluded && course.COURSEID.startsWith(filter);
+        }
+    });
+
+    const courseFilters = {
+        "Computer Science": "CS",
+        "Mathematics": ["MATH", "CALC"],
+        "Psychology": ["PSY"],
+        "Philosophy": ["PHIL"],
+        "Art": ["ART"],
+        "History": ["HIS"],
+        "Film": ["FILM"]
+    };
+
 
     const courseStatus = (courseID) => {
         // Check if the course is in the currently enrolled courses
         if (currInfo.includes(courseID)) {
             return "Currently Taking";
-        } 
+        }
         // Check if the course is in the completed courses
         else if (prevInfo.includes(courseID)) {
             return "Already Taken";
-        } 
+        }
         // Find the course in the prereqInfo array and check if it can be taken
-        else if(prereqInfo.find(course => course.courseId === courseID)){
+        else if (prereqInfo.find(course => course.courseId === courseID)) {
             const course = prereqInfo.find(course => course.courseId === courseID);
             return course && course.canTake ? "Prerequisites met ✅" : "Prerequisites not met ❌";
         }
-        else{
+        else {
             return "Prerequisites met ✅"
         }
     };
@@ -373,6 +399,19 @@ const CourseRegistration = () => {
                                     className="mb-4 w-full p-2 border border-gray-300 rounded"
                                     onChange={handleSearchChange}
                                 />
+                                {/* Filter selection UI */}
+                                <div className="mb-2">
+                                    <label htmlFor="courseFilter" className="font-bold text-purple-900 blocktext-sm font-xl text-gray-700">Filter by department:</label>
+                                    <select
+                                        onChange={(e) => handleFilterChange(e.target.value)}
+                                        className='ml-2 border-2 border-slate-400 rounded-md'
+                                    >
+                                        <option value="">All</option>
+                                        {Object.keys(courseFilters).map(description => (
+                                            <option key={description} value={description}>{description}</option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <div className="space-y-2">
                                     {filteredCourses.map((course) => {
                                         const status = courseStatus(course.COURSEID);
