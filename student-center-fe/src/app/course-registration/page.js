@@ -15,16 +15,19 @@ const CourseRegistration = () => {
     const [tempStoreLecture, setTempStoreLecture] = useState([]);
     const [tempStoreLab, setTempStoreLab] = useState([]);
     const [tempStoreCourseID, setTempStoreCourseID] = useState('');
+    const [prereqInfo, setPrereqInfo] = useState([]);
+    const [currInfo, setCurrInfo] = useState([]);
+    const [prevInfo, setPrevInfo] = useState([]);
 
     const [activeMenu, setActiveMenu] = useState('schedule');
 
     useEffect(() => {
         const menuFromSessionStorage = sessionStorage.getItem("searching");
-        console.log("first checkpoint")
-        console.log(sessionStorage.getItem("searching"))
+        // console.log("first checkpoint")
+        // console.log(sessionStorage.getItem("searching"))
         if (menuFromSessionStorage) {
-            console.log("we cooking")
-            console.log(menuFromSessionStorage)
+            // console.log("we cooking")
+            // console.log(menuFromSessionStorage)
             setActiveMenu(menuFromSessionStorage);
         }
     }, []);
@@ -51,23 +54,40 @@ const CourseRegistration = () => {
         course.COURSENAME.toLowerCase().includes(searchTerm) || course.COURSEID.toLowerCase().includes(searchTerm)
     );
 
+    const courseStatus = (courseID) => {
+        // Check if the course is in the currently enrolled courses
+        if (currInfo.includes(courseID)) {
+            return "Currently Taking";
+        } 
+        // Check if the course is in the completed courses
+        else if (prevInfo.includes(courseID)) {
+            return "Already Taken";
+        } 
+        // Find the course in the prereqInfo array and check if it can be taken
+        else {
+            const course = prereqInfo.find(course => course.courseId === courseID);
+            return course && course.canTake ? "Can Take" : "Cannot Take";
+        }
+    };
+
     let stuID = sessionStorage.getItem('studentId')
 
-    console.log(stuID)
 
     useEffect(() => {
+
+
         if ((activeMenu === 'addCourse') || activeMenu === 'swapCourse') {
             fetch(`http://localhost:3005/api/courses?studentID=${stuID}`)
                 .then((response) => response.json())
                 .then((data) => {
                     setCourses(data);
-                    console.log(data);
+                    // console.log(data);
                 })
                 .catch((error) => {
                     console.error('Error fetching courses:', error);
                 });
         }
-        
+
         const menusThatRequireEnrollmentInfo = ['dropCourse', 'swapCourses'];
         if (menusThatRequireEnrollmentInfo.includes(activeMenu) && stuID) {
             fetch(`http://localhost:3005/api/student-courses?studentId=${stuID}`)
@@ -88,14 +108,54 @@ const CourseRegistration = () => {
                 }
                 const data = await response.json();
                 // Set state or further processing here
+
             } catch (error) {
                 console.error('Error fetching student lectures:', error);
             }
         };
 
+        console.log(stuID)
+
         if (activeMenu === 'schedule' && stuID) {
             fetchStudentLectures();
+
         }
+
+        const fetchPrereqs = async () => {
+            try {
+                const response = await fetch(`http://localhost:3005/api/get-prereqs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ studentID: stuID }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const jsonData = await response.json();
+                console.log(jsonData);
+
+
+
+                setPrereqInfo(jsonData.canTake);
+                setCurrInfo(jsonData.currEnrolled);
+                setPrevInfo(jsonData.prevEnrolled);
+
+                console.log(prereqInfo);
+                console.log(currInfo);
+                console.log(prevInfo);
+            } catch (error) {
+                console.error('Error fetching prerequisites:', error);
+            }
+        };
+
+        if (stuID) {
+            fetchPrereqs();
+        }
+
+
+
     }, [activeMenu, stuID]);
 
 
@@ -123,8 +183,8 @@ const CourseRegistration = () => {
         const data = await response.json();
         //Separate lab and lecture data
         let lectures = []; let labs = [];
-        for(let i=0;i<data.length;i++){
-            if(data[i].hasOwnProperty('LECTUREID'))
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].hasOwnProperty('LECTUREID'))
                 lectures.push(data[i]);
             else
                 labs.push(data[i]);
@@ -133,6 +193,7 @@ const CourseRegistration = () => {
         setTempStoreLab(labs);
         setTempStoreCourseID(courseID);
     }
+
     //Temp to display for confirmation message
     const [storeLecture, setStoreLecture] = useState(0);
     const handleLecture = (lectureID) => {
@@ -154,9 +215,9 @@ const CourseRegistration = () => {
             COURSEID: tempStoreCourseID
         }
         //Fetch API call
-        const response = await fetch(`http://localhost:3005/api/enroll`,{
+        const response = await fetch(`http://localhost:3005/api/enroll`, {
             method: 'POST',
-            headers: {'Content-Type': "application/json"},
+            headers: { 'Content-Type': "application/json" },
             body: JSON.stringify(enrollmentInformation)
         });
         if (!response.ok) {
@@ -183,9 +244,9 @@ const CourseRegistration = () => {
             COURSEID: tempStoreCourseID
         }
         //Fetch API call
-        const response = await fetch(`http://localhost:3005/api/unenroll`,{
+        const response = await fetch(`http://localhost:3005/api/unenroll`, {
             method: 'DELETE',
-            headers: {'Content-Type': "application/json"},
+            headers: { 'Content-Type': "application/json" },
             body: JSON.stringify(enrollmentInformation)
         });
         if (!response.ok) {
@@ -196,7 +257,7 @@ const CourseRegistration = () => {
         setDeleteInfo(!deleteInfo);
         setActiveMenu('schedule');
     }
-    
+
     //Enroll the student in their selected labs and lectures, Drop the student from their withdrawn labs and lectures
     const swap = async () => {
 
@@ -205,16 +266,16 @@ const CourseRegistration = () => {
             COURSEID: SelectedSwapDropCourse,
         }
         //Fetch API call
-        const dropresponse = await fetch(`http://localhost:3005/api/unenroll`,{
+        const dropresponse = await fetch(`http://localhost:3005/api/unenroll`, {
             method: 'DELETE',
-            headers: {'Content-Type': "application/json"},
+            headers: { 'Content-Type': "application/json" },
             body: JSON.stringify(dropInformation)
         });
         if (!dropresponse.ok) {
             alert('Unenrollment Unsuccessful')
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        
+
         //Create REQ body
         const enrollmentInformation = {
             LECTUREID: storeLecture,
@@ -223,9 +284,9 @@ const CourseRegistration = () => {
             COURSEID: tempStoreCourseID
         }
         //Fetch API call
-        const response = await fetch(`http://localhost:3005/api/enroll`,{
+        const response = await fetch(`http://localhost:3005/api/enroll`, {
             method: 'POST',
-            headers: {'Content-Type': "application/json"},
+            headers: { 'Content-Type': "application/json" },
             body: JSON.stringify(enrollmentInformation)
         });
         if (!response.ok) {
@@ -265,6 +326,10 @@ const CourseRegistration = () => {
         setconfirmSwapDropCourse(true)
     };
 
+    console.log(prereqInfo);
+    console.log(currInfo);
+    console.log(prevInfo);
+
     return (
         <>
             <div className="fixed top-0 left-0 w-full z-50">
@@ -298,7 +363,7 @@ const CourseRegistration = () => {
                             <div>
                                 <h2 className="text-2xl font-semibold mb-2">
                                     {activeMenu === 'addCourse' ? 'Add Course' : 'Choose Course to Swap With'}
-                                 </h2>
+                                </h2>
                                 <input
                                     type="text"
                                     placeholder="Search courses..."
@@ -306,15 +371,15 @@ const CourseRegistration = () => {
                                     onChange={handleSearchChange}
                                 />
                                 <div className="space-y-2">
-                                    {filteredCourses.map((course) => (
-                                        <button
-                                            key={course.COURSEID}
-                                            onClick={() => handleInfo(course.COURSEID)}
-                                            className="block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out"
-                                        >
-                                            {course.COURSEID} - {course.COURSENAME}
-                                        </button>
-                                    ))}
+                                    {filteredCourses.map((course) => {
+                                        const status = courseStatus(course.COURSEID);
+                                        return (
+                                            <div key={course.COURSEID} className="flex justify-between block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out">
+                                                <span>{`${course.COURSEID} - ${course.COURSENAME}`}</span>
+                                                <span>{status}</span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -331,7 +396,7 @@ const CourseRegistration = () => {
                                         <th>ENROLL</th>
                                     </tr>
                                     {tempStoreLecture.map((value, key) => {
-                                        return(
+                                        return (
                                             <tr className='grid grid-cols-5 text-center'>
                                                 <td key={key}>{value.LECTUREID}</td>
                                                 <td key={key}>{value.ROOMID}</td>
@@ -352,12 +417,12 @@ const CourseRegistration = () => {
                                         <th>ENROLL</th>
                                     </tr>
                                     {tempStoreLab.map((value, key) => {
-                                        return(
+                                        return (
                                             <tr className='grid grid-cols-5 text-center'>
-                                                <td key={key+tempStoreLab.length}>{value.LABID}</td>
-                                                <td key={key+tempStoreLab.length}>{value.ROOMID}</td>
-                                                <td key={key+tempStoreLab.length}>{value.STARTTIME} - {value.ENDTIME}</td>
-                                                <td key={key+tempStoreLab.length}>{value.STARTDATE} - {value.ENDDATE}</td>
+                                                <td key={key + tempStoreLab.length}>{value.LABID}</td>
+                                                <td key={key + tempStoreLab.length}>{value.ROOMID}</td>
+                                                <td key={key + tempStoreLab.length}>{value.STARTTIME} - {value.ENDTIME}</td>
+                                                <td key={key + tempStoreLab.length}>{value.STARTDATE} - {value.ENDDATE}</td>
                                                 <input type='radio' className='scale-[25%]' name='labRadio' onChange={() => handleLab(value.LABID)}></input>
                                             </tr>
                                         );
@@ -365,16 +430,16 @@ const CourseRegistration = () => {
                                 </table>
                                 <div className='inline justify-between'>
                                     <button className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' onClick={handleInfo}>Back</button>
-                                    <button 
-                                    className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6' 
-                                    onClick={() => {
-                                        if (activeMenu === 'addCourse') {
-                                            enroll(); // Call enroll function for addCourse menu
-                                        } 
-                                        else {
-                                            swap(); // Call swap function for swapCourse menu
-                                        } 
-                                    }}
+                                    <button
+                                        className='bg-purple-200 hover:bg-purple-300 rounded-lg px-4 py-2 m-6'
+                                        onClick={() => {
+                                            if (activeMenu === 'addCourse') {
+                                                enroll(); // Call enroll function for addCourse menu
+                                            }
+                                            else {
+                                                swap(); // Call swap function for swapCourse menu
+                                            }
+                                        }}
                                     >Confirm</button>
                                 </div>
                             </div>
@@ -416,7 +481,7 @@ const CourseRegistration = () => {
                                         >
                                             {course.COURSEID}
                                         </button>
-                                        
+
                                     ))}
                                 </div>
                             </div>
@@ -432,7 +497,7 @@ const CourseRegistration = () => {
 
                             </div>
                         )}
-                        
+
                         {activeMenu === 'scheduleGeneration' && (
                             <div>
                                 <ScheduleGenerationCalendar />

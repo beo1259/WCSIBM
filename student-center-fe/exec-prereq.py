@@ -1,5 +1,6 @@
 import paramiko
 import sys
+import json
 
 hostname = '204.90.115.200'
 port = 22
@@ -17,13 +18,17 @@ def main(studentId):
 
         stdin, stdout, stderr = client.exec_command(f'cd {java_class_directory} && /usr/lpp/java/J8.0_64/bin/java -cp . {java_class_name} {studentId}')
         
-        print(stdout.read().decode().strip())
+        print(stdout.read().decode())
+
+
+
         sys.stdout.flush()
             
     finally:
         client.close()
         
 if __name__ == "__main__":
+    #823321975
     main(823321975)
 else: 
     sys.exit(1)

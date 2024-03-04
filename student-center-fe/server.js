@@ -113,9 +113,9 @@ app.post('/get-average', (req, res) => {
   });
 });
 
-app.post('/get-prereqs', (req, res) => {
+app.post('/api/get-prereqs', (req, res) => {
   const { studentID } = req.body;
-  console.log(`Received studentID: ${studentID}`);
+  console.log(`Received studentID: ${studentID} for prereqs`);
 
   const script = spawn('python3', ['./exec-prereq.py', studentID]);
   let outputData = '';
@@ -130,9 +130,18 @@ app.post('/get-prereqs', (req, res) => {
 
   script.on('close', (code) => {
     console.log(`Child process exited with code ${code}`);
-    console.log(outputData.trim())
     if (code === 0) {
-      res.send(outputData.trim());
+      try {
+        // Parse the string to a JavaScript object
+        const parsedOutput = JSON.parse(outputData);
+        // Send a JSON response
+        res.json(parsedOutput);
+        console.log(parsedOutput)
+      } catch (error) {
+        // Handle the case where the outputData is not valid JSON
+        console.error('Failed to parse outputData:', outputData);
+        res.status(500).send('Server error: Invalid output format from script');
+      }
     } else {
       res.status(500).send('Error executing script');
     }
