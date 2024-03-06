@@ -7,9 +7,6 @@ N
 CS2208    1   605165100 
 Introduction to Computer Organization and Architecture1 
 N 
-CS2209    1   128416350 
-Applied Logic for Computer Science1 
-N 
 CS2210    1   128416350 
 Data Structures and Algorithms1 
 N 
@@ -36,9 +33,6 @@ Foundations of Computer Science I1
 N 
 CS3340    1   605165100 
 Analysis of Algorithms I1 
-N 
-CS3342    1   269129914 
-Organization of Programming Languages1 
 N 
 CS3346    1   605165100 
 Artificial Intelligence I1 
@@ -85,9 +79,6 @@ None
 ART1646   13  432179043 
 Art, Media and Popular Culture1 
 None
-HIS2177   15  563327890 
-The Two World Wars1 
-None
 HIS2186   15  563327890 
 Zombie Apocalypse1 
 None
@@ -96,9 +87,6 @@ United States: 1865 To Present1
 None
 HIS2401   15  563327890 
 Medieval Europe1 
-None
-PSY1002   3   777073656 
-Psychology As Natural Science1 
 None
 PSY2015   3   777073656 
 Psych Of Perception1 
@@ -118,3 +106,15 @@ N
 HIS1000   15  563327890 
 Classical Civilization1 
 N 
+CS2209    1   128416350 
+Applied Logic for Computer Science1 
+N 
+CS3342    1   269129914 
+Organization of Programming Languages1 
+N 
+HIS2177   15  563327890 
+The Two World Wars1 
+None
+PSY1002   3   777073656 
+Psychology As Natural Science1 
+None
