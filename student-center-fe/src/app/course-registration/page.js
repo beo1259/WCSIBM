@@ -18,6 +18,7 @@ const CourseRegistration = () => {
     const [prereqInfo, setPrereqInfo] = useState(null);
     const [currInfo, setCurrInfo] = useState([]);
     const [prevInfo, setPrevInfo] = useState([]);
+    const [studentFindInfo, setStudentFindInfo] = useState(null);
 
     const [activeMenu, setActiveMenu] = useState('schedule');
 
@@ -42,6 +43,7 @@ const CourseRegistration = () => {
     const [isInfo, setInfo] = useState(false);
     const handleInfo = async (courseID) => {
         courseInformation(courseID);
+        fetchStudentFind(courseID);
         setInfo(!isInfo);
     }
 
@@ -58,7 +60,7 @@ const CourseRegistration = () => {
         const courseLowercased = course.COURSENAME.toLowerCase();
         const searchTermIncluded = courseLowercased.includes(searchTerm) || course.COURSEID.toLowerCase().includes(searchTerm);
 
-        if (!filter) return searchTermIncluded; 
+        if (!filter) return searchTermIncluded;
 
         if (Array.isArray(filter)) {
             return searchTermIncluded && filter.some(prefix => course.COURSEID.startsWith(prefix));
@@ -80,7 +82,7 @@ const CourseRegistration = () => {
 
     const courseStatus = (courseID) => {
         // Check if the course is in the currently enrolled courses
-        if(prereqInfo == null){
+        if (prereqInfo == null) {
             return "Loading...";
         }
         if (currInfo.includes(courseID)) {
@@ -98,7 +100,7 @@ const CourseRegistration = () => {
         else if (!prereqInfo.find(course => course.courseId === courseID)) {
             return "Prerequisites met ✅";
         }
-        
+
     };
 
     let stuID = sessionStorage.getItem('studentId')
@@ -185,34 +187,34 @@ const CourseRegistration = () => {
             fetchPrereqs();
         }
 
-        const fetchStudentFind = async () => {
-            try {
-                const response = await fetch(`http://localhost:3005/api/get-studentFind`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ courseID: 'CS2211', studentID: stuID }),
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const jsonData = await response.json();
-                console.log(jsonData);
 
-                
-            } catch (error) {
-                console.error('Error fetching prerequisites:', error);
-            }
-        };
 
-        if (stuID) {
+        if (stuID && isInfo) {
             fetchStudentFind();
         }
 
     }, [activeMenu, stuID]);
 
+    const fetchStudentFind = async (courseid) => {
+        try {
+            const response = await fetch(`http://localhost:3005/api/get-studentFind`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ courseID: courseid, studentID: stuID }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const jsonData = await response.json();
+            console.log(jsonData);
 
+            setStudentFindInfo(jsonData);
+        } catch (error) {
+            console.error('Error fetching prerequisites:', error);
+        }
+    };
 
     const menuItems = {
         schedule: 'Your Schedule',
@@ -441,7 +443,8 @@ const CourseRegistration = () => {
                                     {filteredCourses.map((course) => {
                                         const status = courseStatus(course.COURSEID);
                                         return (
-                                            <div key={course.COURSEID} className="flex justify-between block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out">
+                                            <div onClick={() => handleInfo(course.COURSEID)}
+                                                key={course.COURSEID} className="flex justify-between block w-full text-left p-2 bg-purple-200 rounded-lg hover:bg-purple-300 focus:outline-none focus:ring focus:border-purple-300 transition duration-150 ease-in-out">
                                                 <span>{`${course.COURSEID} - ${course.COURSENAME}`}</span>
                                                 <span>{status}</span>
                                             </div>
@@ -453,6 +456,7 @@ const CourseRegistration = () => {
                         {/*Enrollment confirmation*/}
                         {(activeMenu === 'addCourse' || activeMenu === 'swapCourse') && isInfo && (
                             <div>
+
                                 <p className='font-semibold border-b-2 border-black mb-4'>Lectures</p>
                                 <table className='w-full p-6 divide-y-2'>
                                     <tr className='grid grid-cols-5'>
@@ -509,6 +513,19 @@ const CourseRegistration = () => {
                                         }}
                                     >Confirm</button>
                                 </div>
+                                {studentFindInfo && (
+                                    <div className="mb-4 p-4 bg-purple-200 rounded-lg">
+                                        <h3 className="font-bold">Suggested Helper:</h3>
+                                        <p>Helper Name: {studentFindInfo.name}</p>
+                                        <p>Helper Email: {studentFindInfo.email}</p>
+                                    </div>
+                                )}
+                                {!studentFindInfo && (
+                                    <div className="mb-4 p-4 bg-purple-200 rounded-lg">
+                                        <h3 className="font-bold">Suggested Helper Loading...</h3>
+
+                                    </div>
+                                )}
                             </div>
                         )}
                         {activeMenu === 'dropCourse' && !deleteInfo && (

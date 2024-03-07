@@ -118,7 +118,7 @@ app.post('/api/get-studentFind', (req, res) => {
 
   console.log(`Received courseID: ${courseID} studentID: ${studentID} for studentFind`);
 
-  const script = spawn('python3', ['./exec-stuFind.py', studentID]);
+  const script = spawn('python3', ['./exec-stuFind.py', courseID, studentID]);
   let outputData = '';
 
   script.stdout.on('data', (data) => {
