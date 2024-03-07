@@ -32,8 +32,7 @@ const LoginPage = () => {
       // Fetch grades and set years in session storage
       const yearArray = await fetchGradesAndSetYears();
       
-      // Now, fetch averages using the yearArray
-      await fetchAverages(loginData.user.STUDENTID, yearArray);
+      fetchAverages(loginData.user.STUDENTID, yearArray);
 
     } catch (error) {
       console.error('Login request failed:', error);
@@ -94,8 +93,9 @@ const LoginPage = () => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-
-      const avg = await response.json(); // Assuming the server sends JSON
+      
+      const avg = await response.text(); 
+      console.log(avg);
       return avg; // Adjust based on the actual response structure
     } catch (error) {
       console.error(`Error fetching average for year: ${year}`, error);
