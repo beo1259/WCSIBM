@@ -185,7 +185,30 @@ const CourseRegistration = () => {
             fetchPrereqs();
         }
 
+        const fetchStudentFind = async () => {
+            try {
+                const response = await fetch(`http://localhost:3005/api/get-studentFind`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ courseID: 'CS2211', studentID: stuID }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const jsonData = await response.json();
+                console.log(jsonData);
 
+                
+            } catch (error) {
+                console.error('Error fetching prerequisites:', error);
+            }
+        };
+
+        if (stuID) {
+            fetchStudentFind();
+        }
 
     }, [activeMenu, stuID]);
 

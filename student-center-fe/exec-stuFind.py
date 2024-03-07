@@ -27,6 +27,6 @@ def main(courseId, studentId):
         
 if __name__ == "__main__":
     #823321975
-    main('CS2211', "251314385")
+    main(sys.argv[0], sys.argv[1])
 else: 
     sys.exit(1)

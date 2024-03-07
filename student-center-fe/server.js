@@ -117,8 +117,8 @@ app.post('/api/get-studentFind', (req, res) => {
   const { courseID, studentID } = req.body;
 
   console.log(`Received courseID: ${courseID} studentID: ${studentID} for studentFind`);
-  
-  const script = spawn('python3', ['./exec-prereq.py', studentID]);
+
+  const script = spawn('python3', ['./exec-stuFind.py', studentID]);
   let outputData = '';
 
   script.stdout.on('data', (data) => {
@@ -135,6 +135,7 @@ app.post('/api/get-studentFind', (req, res) => {
       try {
         // Parse the string to a JavaScript object
         const parsedOutput = JSON.parse(outputData);
+        console.log(parsedOutput)
         // Send a JSON response
         res.json(parsedOutput);
       } catch (error) {
