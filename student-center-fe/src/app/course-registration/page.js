@@ -19,6 +19,7 @@ const CourseRegistration = () => {
     const [currInfo, setCurrInfo] = useState([]);
     const [prevInfo, setPrevInfo] = useState([]);
     const [studentFindInfo, setStudentFindInfo] = useState(null);
+    
 
     const [activeMenu, setActiveMenu] = useState('schedule');
 
@@ -513,6 +514,8 @@ const CourseRegistration = () => {
                                         }}
                                     >Confirm</button>
                                 </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
                                 {studentFindInfo && (
                                     <div className="mb-4 p-4 bg-purple-200 rounded-lg">
                                         <h3 className="font-bold">Suggested Helper:</h3>
@@ -526,6 +529,22 @@ const CourseRegistration = () => {
 
                                     </div>
                                 )}
+
+                                {studentFindInfo && (
+                                    <div className="mb-4 p-4 bg-purple-200 rounded-lg">
+                                        <h3 className="font-bold">Suggested Helper:</h3>
+                                        <p>Helper Name: {studentFindInfo.name}</p>
+                                        <p>Helper Email: {studentFindInfo.email}</p>
+                                    </div>
+                                )}
+                                {!studentFindInfo && (
+                                    <div className="mb-4 p-4 bg-purple-200 rounded-lg">
+                                        <h3 className="font-bold">Suggested Helper Loading...</h3>
+
+                                    </div>
+                                )}
+
+                            </div>
                             </div>
                         )}
                         {activeMenu === 'dropCourse' && !deleteInfo && (
