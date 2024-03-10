@@ -324,6 +324,7 @@ def generate_schedule(student_id, catA, catB, catC, catEssay, progAmt):
       
         counter += 1 
         
+        
     if num_courses_scheduled < 5:
         essay_courses, breadth_courses = fetch_requirement_courses(db_conn, student_id, scheduled_courses, catA, catB, catC, catEssay)
         
@@ -333,22 +334,29 @@ def generate_schedule(student_id, catA, catB, catC, catEssay, progAmt):
         # Shuffle the combined list to ensure random selection
         random.shuffle(combined_courses)
         
+        selected_course_ids = set() # added this so the same prereq isnt picked twice
+
+        
         while num_courses_scheduled < 5 and combined_courses:
-            
             # Select a course from the combined list
             chosen_course = combined_courses.pop()
-            if has_taken_course(student_id, chosen_course['COURSEID'], db_conn):
+            
+            # Skip if the course has already been taken or if it's already scheduled
+            if has_taken_course(student_id, chosen_course['COURSEID'], db_conn) or chosen_course['COURSEID'] in selected_course_ids:
                 continue
+            
             # Check for time conflicts with already scheduled courses
             if not check_time_conflicts(chosen_course, scheduled_courses):
                 # Add the chosen course to the schedule
                 scheduled_courses.append(chosen_course)
+                # Add the course ID to the set of selected course IDs
+                selected_course_ids.add(chosen_course['COURSEID'])
                 # Add the time of the chosen course to scheduled_times for future conflict checks
                 scheduled_times.append({
                     'STARTTIME': chosen_course['STARTTIME'], 
                     'ENDTIME': chosen_course['ENDTIME'], 
                     'WEEKDAY': chosen_course['WEEKDAY'], 
-                    })
+                })
                 num_courses_scheduled += 1
                 
 
@@ -376,34 +384,34 @@ def generate_schedule(student_id, catA, catB, catC, catEssay, progAmt):
     
     ibm_db.close(db_conn)
         
-def main(studentID, catA, catB, catC, catEssay, progAmt):
-    generate_schedule(studentID, catA, catB, catC, catEssay, progAmt)
+        
+generate_schedule('823321975', False, False, False, True, 2)        
+        
+# def main(studentID, catA, catB, catC, catEssay, progAmt):
+#     generate_schedule(studentID, catA, catB, catC, catEssay, progAmt)
 
-
-#generate_schedule('823321975', False, False, False, True, 4)
-
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        studentID = sys.argv[1]
-        if(sys.argv[2] == 'true'):
-            catA = True
-        else:
-            catA = False
-        if(sys.argv[3] == 'true'):
-            catB = True
-        else:
-            catB = False
-        if(sys.argv[4] == 'true'):
-            catC = True
-        else:
-            catC = False
-        if(sys.argv[5] == 'true'):
-            catEssay = True
-        else:
-            catEssay = False
-        3
-        progAmt = int(sys.argv[6])
-        main(studentID, catA, catB, catC, catEssay, progAmt)
-    else:
-        sys.exit(1)
+# if __name__ == "__main__":
+#     if len(sys.argv) > 1:
+#         studentID = sys.argv[1]
+#         if(sys.argv[2] == 'true'):
+#             catA = True
+#         else:
+#             catA = False
+#         if(sys.argv[3] == 'true'):
+#             catB = True
+#         else:
+#             catB = False
+#         if(sys.argv[4] == 'true'):
+#             catC = True
+#         else:
+#             catC = False
+#         if(sys.argv[5] == 'true'):
+#             catEssay = True
+#         else:
+#             catEssay = False
+#         3
+#         progAmt = int(sys.argv[6])
+#         main(studentID, catA, catB, catC, catEssay, progAmt)
+#     else:
+#         sys.exit(1)
 
