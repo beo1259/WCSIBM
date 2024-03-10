@@ -84,7 +84,7 @@ app.get('/course-category', (req, res) => {
 
 app.post('/get-average', (req, res) => {
   const { studentID, year } = req.body;
-  console.log(`Received studentID: ${studentID}, year: ${year}`);
+  //console.log(`Received studentID: ${studentID}, year: ${year}`);
 
   const script = spawn('python3', ['./exec-gpa.py', studentID, year]);
   let outputData = '';
@@ -99,7 +99,6 @@ app.post('/get-average', (req, res) => {
 
   script.on('close', (code) => {
     console.log(`Child process exited with code ${code}`);
-    console.log(outputData.trim())
     if (code === 0) {
       res.send(outputData.trim());
     } else {
@@ -135,7 +134,6 @@ app.post('/api/get-studentFind', (req, res) => {
       try {
         // Parse the string to a JavaScript object
         const parsedOutput = JSON.parse(outputData);
-        console.log(parsedOutput)
         // Send a JSON response
         res.json(parsedOutput);
       } catch (error) {
@@ -156,7 +154,7 @@ app.post('/api/get-studentFind', (req, res) => {
 
 app.post('/api/get-prereqs', (req, res) => {
   const { studentID } = req.body;
-  console.log(`Received studentID: ${studentID} for prereqs`);
+  //console.log(`Received studentID: ${studentID} for prereqs`);
 
   const script = spawn('python3', ['./exec-prereq.py', studentID]);
   let outputData = '';
@@ -175,6 +173,46 @@ app.post('/api/get-prereqs', (req, res) => {
       try {
         // Parse the string to a JavaScript object
         const parsedOutput = JSON.parse(outputData);
+        // Send a JSON response
+        res.json(parsedOutput);
+      } catch (error) {
+        // Handle the case where the outputData is not valid JSON
+        console.error('Failed to parse outputData:', outputData);
+        res.status(500).send('Server error: Invalid output format from script');
+      }
+    } else {
+      res.status(500).send('Error executing script');
+    }
+  });
+
+  script.on('error', (error) => {
+    console.error('Failed to start script:', error);
+    res.status(500).send('Error starting script');
+  });
+});
+
+app.post('/api/get-prevavg', (req, res) => {
+  const { courseID } = req.body;
+  console.log(`Received courseid: ${courseID} for prev avgs`);
+
+  const script = spawn('python3', ['./exec-prevavg.py', courseID]);
+  let outputData = '';
+
+  script.stdout.on('data', (data) => {
+    outputData += data.toString();
+  });
+
+  script.stderr.on('data', (data) => {
+    console.error(`stderr: ${data.toString()}`);
+  });
+
+  script.on('close', (code) => {
+    console.log(`Child process exited with code ${code}`);
+    if (code === 0) {
+      try {
+        // Parse the string to a JavaScript object
+        const parsedOutput = JSON.parse(outputData);
+        console.log(parsedOutput)
         // Send a JSON response
         res.json(parsedOutput);
       } catch (error) {

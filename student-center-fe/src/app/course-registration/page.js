@@ -19,7 +19,7 @@ const CourseRegistration = () => {
     const [currInfo, setCurrInfo] = useState([]);
     const [prevInfo, setPrevInfo] = useState([]);
     const [studentFindInfo, setStudentFindInfo] = useState(null);
-    
+    const [prevAvgInfo, setPrevAvgInfo] = useState(null);
 
     const [activeMenu, setActiveMenu] = useState('schedule');
 
@@ -45,6 +45,7 @@ const CourseRegistration = () => {
     const handleInfo = async (courseID) => {
         courseInformation(courseID);
         fetchStudentFind(courseID);
+        fetchPrevAvgs(courseID);
         setInfo(!isInfo);
     }
 
@@ -188,12 +189,6 @@ const CourseRegistration = () => {
             fetchPrereqs();
         }
 
-
-
-        if (stuID && isInfo) {
-            fetchStudentFind();
-        }
-
     }, [activeMenu, stuID]);
 
     const fetchStudentFind = async (courseid) => {
@@ -216,6 +211,28 @@ const CourseRegistration = () => {
             console.error('Error fetching prerequisites:', error);
         }
     };
+
+    const fetchPrevAvgs = async (courseid) => {
+        try {
+            const response = await fetch(`http://localhost:3005/api/get-prevavg`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ courseID: courseid }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const jsonData = await response.json();
+            console.log(jsonData);
+
+            setPrevAvgInfo(jsonData.prevAvg);
+        } catch (error) {
+            console.error('Error fetching prerequisites:', error);
+        }
+    };
+
 
     const menuItems = {
         schedule: 'Your Schedule',
@@ -514,37 +531,44 @@ const CourseRegistration = () => {
                                         }}
                                     >Confirm</button>
                                 </div>
-                                
+
                                 <div className="grid grid-cols-2 gap-4">
-                                {studentFindInfo && (
-                                    <div className="mb-4 p-4 bg-purple-200 rounded-lg">
-                                        <h3 className="font-bold">Suggested Helper:</h3>
-                                        <p>Helper Name: {studentFindInfo.name}</p>
-                                        <p>Helper Email: {studentFindInfo.email}</p>
-                                    </div>
-                                )}
-                                {!studentFindInfo && (
-                                    <div className="mb-4 p-4 bg-purple-200 rounded-lg">
-                                        <h3 className="font-bold">Suggested Helper Loading...</h3>
+                                    {studentFindInfo && (
+                                        <div className="mb-4 p-4 bg-purple-200 rounded-lg flex flex-col items-left justify-center">
+                                            <h3 className="font-bold">Suggested Helper:</h3>
 
-                                    </div>
-                                )}
+                                            <p>Helper Name: <span className='mt-4 font-semibold'>{studentFindInfo.name}</span></p>
+                                            <p>Helper Email: <span className='font-semibold'>{studentFindInfo.email}</span></p>
+                                        </div>
+                                    )}
+                                    {!studentFindInfo && (
+                                        <div className="mb-4 p-4 bg-purple-200 rounded-lg">
+                                            <h3 className="font-bold">Suggested Helper Loading...</h3>
 
-                                {studentFindInfo && (
-                                    <div className="mb-4 p-4 bg-purple-200 rounded-lg">
-                                        <h3 className="font-bold">Suggested Helper:</h3>
-                                        <p>Helper Name: {studentFindInfo.name}</p>
-                                        <p>Helper Email: {studentFindInfo.email}</p>
-                                    </div>
-                                )}
-                                {!studentFindInfo && (
-                                    <div className="mb-4 p-4 bg-purple-200 rounded-lg">
-                                        <h3 className="font-bold">Suggested Helper Loading...</h3>
+                                        </div>
+                                    )}
 
-                                    </div>
-                                )}
+                                    {prevAvgInfo && (
+                                        <div className="mb-4 p-4 bg-purple-200 rounded-lg">
+                                            <h3 className="font-bold">Previous Course Grade Averages:</h3>
+                                            {prevAvgInfo.map((avg, index) => (
+                                                <div key={index}>
+                                                    <p> </p>
+                                                    <p><span className='font-bold'>Average: </span>{avg.average}</p>
+                                                    <p><span className='font-bold '>Year: </span>{avg.year}</p>
+                                                    <hr class="border-t border-black my-3" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {!prevAvgInfo && (
+                                        <div className="mb-4 p-4 bg-purple-200 rounded-lg">
+                                            <h3 className="font-bold">Loading Previous Averages...</h3>
 
-                            </div>
+                                        </div>
+                                    )}
+
+                                </div>
                             </div>
                         )}
                         {activeMenu === 'dropCourse' && !deleteInfo && (
