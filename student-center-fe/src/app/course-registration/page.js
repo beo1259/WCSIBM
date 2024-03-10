@@ -550,7 +550,7 @@ const CourseRegistration = () => {
 
                                     {prevAvgInfo && (
                                         <div className="mb-4 p-4 bg-purple-200 rounded-lg">
-                                            <h3 className="font-bold">Previous Course Grade Averages:</h3>
+                                            <h3 className="font-bold mb-5">Previous Course Grade Averages:</h3>
                                             {prevAvgInfo.map((avg, index) => (
                                                 <div key={index}>
                                                     <p> </p>
