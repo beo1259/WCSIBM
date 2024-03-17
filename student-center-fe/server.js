@@ -86,7 +86,7 @@ app.post('/get-average', (req, res) => {
   const { studentID, year } = req.body;
   //console.log(`Received studentID: ${studentID}, year: ${year}`);
 
-  const script = spawn('python3', ['./exec-gpa.py', studentID, year]);
+  const script = spawn('py', ['./exec-gpa.py', studentID, year]);
   let outputData = '';
 
   script.stdout.on('data', (data) => {
@@ -117,7 +117,7 @@ app.post('/api/get-studentFind', (req, res) => {
 
   console.log(`Received courseID: ${courseID} studentID: ${studentID} for studentFind`);
 
-  const script = spawn('python3', ['./exec-stuFind.py', courseID, studentID]);
+  const script = spawn('py', ['./exec-stuFind.py', courseID, studentID]);
   let outputData = '';
 
   script.stdout.on('data', (data) => {
@@ -156,7 +156,7 @@ app.post('/api/get-prereqs', (req, res) => {
   const { studentID } = req.body;
   //console.log(`Received studentID: ${studentID} for prereqs`);
 
-  const script = spawn('python3', ['./exec-prereq.py', studentID]);
+  const script = spawn('py', ['./exec-prereq.py', studentID]);
   let outputData = '';
 
   script.stdout.on('data', (data) => {
@@ -195,7 +195,7 @@ app.post('/api/get-prevavg', (req, res) => {
   const { courseID } = req.body;
   console.log(`Received courseid: ${courseID} for prev avgs`);
 
-  const script = spawn('python3', ['./exec-prevavg.py', courseID]);
+  const script = spawn('py', ['./exec-prevavg.py', courseID]);
   let outputData = '';
 
   script.stdout.on('data', (data) => {
@@ -240,7 +240,7 @@ app.post('/generate-schedule', (req, res) => {
   const { catEssay } = req.body;
   const { progAmt } = req.body;
 
-  const script = spawn('python', ['./schedule-generation-alg.py', studentID, catA, catB, catC, catEssay, progAmt]);
+  const script = spawn('py', ['-3.7', 'schedule-generation-alg.py', studentID, catA, catB, catC, catEssay, progAmt]);
   let outputData = '';
 
   // Listen for data from the script
