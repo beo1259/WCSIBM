@@ -23,6 +23,3 @@ Zmframewcs_54379@
 To start db2 on linuxone for clp access thru ssh:
 docker exec -ti mydb2 su - db2inst1
 db2
-
-GPT-4 API Key (*DO NOT SPAM THIS I HAVE TO PAY, I CAN SEE UR IP WHEN U USE IT ILL COME FOR U* ask me first if it's for db2 data generation, which is fine):
-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
